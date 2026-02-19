@@ -5,6 +5,7 @@ import { AuthProvider } from "@/lib/auth";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { DepositPage } from "@/pages/DepositPage";
 import { ExchangePage } from "@/pages/ExchangePage";
+import { InvoicePage } from "@/pages/InvoicePage";
 import { LoginPage } from "@/pages/LoginPage";
 import { OrdersPage } from "@/pages/OrdersPage";
 import { SettingsPage } from "@/pages/SettingsPage";
@@ -23,6 +24,7 @@ function App() {
               <Route path="/deposit" element={<DepositPage />} />
               <Route path="/withdraw" element={<WithdrawPage />} />
               <Route path="/exchange" element={<ExchangePage />} />
+              <Route path="/invoices" element={<InvoicePage />} />
               <Route path="/orders" element={<OrdersPage />} />
               <Route path="/whitelist" element={<WhitelistPage />} />
               <Route path="/settings" element={<SettingsPage />} />

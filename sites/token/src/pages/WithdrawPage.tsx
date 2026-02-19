@@ -27,6 +27,7 @@ import type {
   XrpWithdrawalResult,
 } from "@/lib/types";
 import { useAuthContext } from "@/lib/useAuthContext";
+import { cn } from "@/lib/utils";
 import { explorerTxUrl } from "@/lib/xrpl";
 
 interface TokenBalanceDisplay extends TrustlineInfo {
@@ -103,7 +104,10 @@ function FiatWithdrawForm({
     <>
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">{t("withdraw.fiatTitle")}</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <ArrowRight className="h-4 w-4 text-rose-600" />
+            {t("withdraw.fiatTitle")}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <PrerequisiteAlerts needsKyc={prereq.needsKyc} needsMfa={prereq.needsMfa} onKycComplete={onKycComplete} />
@@ -140,71 +144,71 @@ function FiatWithdrawForm({
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit}>
-              <div
-                className={`rounded-2xl border p-4 space-y-4${prereq.disabled || bankList.length === 0 ? "cursor-not-allowed opacity-50 [&_*]:pointer-events-none" : ""}`}
-              >
-                <div className="space-y-4">
-                  <div className="flex items-stretch gap-3">
-                    <div className="flex-1 rounded-2xl border p-4">
-                      <p className="text-muted-foreground text-xs">{t("withdraw.amountYen")}</p>
-                      <Input
-                        type="number"
-                        min={1}
-                        max={user.fiatBalance}
-                        step={1}
-                        value={amount}
-                        onChange={(e) => setAmount(e.target.value)}
-                        placeholder={t("withdraw.amountPlaceholder")}
-                        className="mt-1"
-                        required
-                      />
-                      <p className="mt-2 text-muted-foreground text-xs">
-                        {t("exchange.availableBalance")}: {formatCurrency(user.fiatBalance)}
-                      </p>
-                      {amount && Number(amount) > user.fiatBalance && (
-                        <p className="mt-1 text-destructive text-xs">{t("common.insufficientBalance")}</p>
-                      )}
-                    </div>
-                    <div className="flex items-center">
-                      <ArrowRight className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                    <div className="flex-1 rounded-2xl border p-4">
-                      <p className="text-muted-foreground text-xs">{t("withdraw.destinationAccount")}</p>
-                      <Select value={selectedBank || undefined} onValueChange={setSelectedBank}>
-                        <SelectTrigger className="mt-1 w-full">
-                          <SelectValue placeholder={t("withdraw.destinationAccount")} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {bankList.map((b) => (
-                            <SelectItem
-                              key={`${b.branchCode}-${b.accountNumber}`}
-                              value={`${b.branchCode}-${b.accountNumber}`}
-                            >
-                              {b.label} - {getBankName(b.bankCode)} {getBranchName(b.branchCode)}/{b.accountNumber}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  {error && <p className="text-destructive text-sm">{error}</p>}
-                  <Button
-                    type="submit"
-                    className="w-full"
-                    disabled={
-                      prereq.disabled ||
-                      bankList.length === 0 ||
-                      loading ||
-                      !amount ||
-                      !selectedBank ||
-                      Number(amount) > user.fiatBalance
-                    }
-                  >
-                    {loading ? t("common.processing") : t("withdraw.withdrawButton")}
-                  </Button>
+            <form
+              onSubmit={handleSubmit}
+              className={cn(
+                "space-y-4",
+                (prereq.disabled || bankList.length === 0) && "cursor-not-allowed opacity-50 [&_*]:pointer-events-none",
+              )}
+            >
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
+                <div className="flex-1 rounded-2xl border p-4">
+                  <p className="text-muted-foreground text-xs">{t("withdraw.amountYen")}</p>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={user.fiatBalance}
+                    step={1}
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder={t("withdraw.amountPlaceholder")}
+                    className="mt-1"
+                    required
+                  />
+                  <p className="mt-2 text-muted-foreground text-xs">
+                    {t("exchange.availableBalance")}: {formatCurrency(user.fiatBalance)}
+                  </p>
+                  {amount && Number(amount) > user.fiatBalance && (
+                    <p className="mt-1 text-destructive text-xs">{t("common.insufficientBalance")}</p>
+                  )}
+                </div>
+                <div className="flex items-center justify-center">
+                  <ArrowRight className="h-5 w-5 rotate-90 text-muted-foreground sm:rotate-0" />
+                </div>
+                <div className="flex-1 rounded-2xl border p-4">
+                  <p className="text-muted-foreground text-xs">{t("withdraw.destinationAccount")}</p>
+                  <Select value={selectedBank || undefined} onValueChange={setSelectedBank}>
+                    <SelectTrigger className="mt-1 w-full">
+                      <SelectValue placeholder={t("withdraw.destinationAccount")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {bankList.map((b) => (
+                        <SelectItem
+                          key={`${b.branchCode}-${b.accountNumber}`}
+                          value={`${b.branchCode}-${b.accountNumber}`}
+                        >
+                          {b.label} - {getBankName(b.bankCode)} {getBranchName(b.branchCode)}/{b.accountNumber}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
+              {error && <p className="text-destructive text-sm">{error}</p>}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={
+                  prereq.disabled ||
+                  bankList.length === 0 ||
+                  loading ||
+                  !amount ||
+                  !selectedBank ||
+                  Number(amount) > user.fiatBalance
+                }
+              >
+                {loading ? t("common.processing") : t("withdraw.withdrawButton")}
+              </Button>
             </form>
           )}
         </CardContent>
@@ -299,7 +303,10 @@ function XrpWithdrawForm({ prereq }: { prereq: { needsKyc: boolean; needsMfa: bo
     <>
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">{t("withdraw.xrpTitle")}</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <ArrowRight className="h-4 w-4 text-rose-600" />
+            {t("withdraw.xrpTitle")}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <PrerequisiteAlerts needsKyc={prereq.needsKyc} needsMfa={prereq.needsMfa} />
@@ -341,85 +348,85 @@ function XrpWithdrawForm({ prereq }: { prereq: { needsKyc: boolean; needsMfa: bo
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit}>
-              <div
-                className={`rounded-2xl border p-4 space-y-4${prereq.disabled || xrpList.length === 0 ? "cursor-not-allowed opacity-50 [&_*]:pointer-events-none" : ""}`}
-              >
-                <div className="space-y-4">
-                  <div className="flex items-stretch gap-3">
-                    <div className="flex-1 rounded-2xl border p-4">
-                      <p className="text-muted-foreground text-xs">{t("withdraw.tokenLabel")}</p>
-                      <Select value={tokenId || undefined} onValueChange={setTokenId}>
-                        <SelectTrigger className="mt-1 w-full">
-                          <SelectValue placeholder={t("withdraw.tokenSelect")} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {tokens.map((tk) => (
-                            <SelectItem key={tk.tokenId} value={tk.tokenId}>
-                              {tk.currency} - {tk.issuerAddress}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <p className="mt-3 text-muted-foreground text-xs">{t("withdraw.tokenAmount")}</p>
-                      <Input
-                        type="number"
-                        min={1}
-                        max={selectedBalance?.balance ?? undefined}
-                        step="any"
-                        value={tokenAmount}
-                        onChange={(e) => setTokenAmount(e.target.value)}
-                        placeholder={t("withdraw.quantityPlaceholder")}
-                        className="mt-1"
-                        required
-                      />
-                      <p className="mt-2 text-muted-foreground text-xs">
-                        {t("exchange.availableBalance")}:{" "}
-                        {tokenId && selectedBalance
-                          ? `${formatTokenAmount(selectedBalance.balance)} ${tokens.find((tk) => tk.tokenId === tokenId)?.currency ?? ""}`
-                          : "--"}
-                      </p>
-                      {tokenAmount && selectedBalance && Number(tokenAmount) > selectedBalance.balance && (
-                        <p className="mt-1 text-destructive text-xs">{t("common.insufficientBalance")}</p>
-                      )}
-                    </div>
-                    <div className="flex items-center">
-                      <ArrowRight className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                    <div className="flex-1 rounded-2xl border p-4">
-                      <p className="text-muted-foreground text-xs">{t("withdraw.destinationAddress")}</p>
-                      <Select value={selectedAddress || undefined} onValueChange={setSelectedAddress}>
-                        <SelectTrigger className="mt-1 w-full">
-                          <SelectValue placeholder={t("withdraw.destinationAddress")} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {xrpList.map((item) => (
-                            <SelectItem key={item.address} value={item.address}>
-                              {item.label} - {item.address}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  {error && <p className="text-destructive text-sm">{error}</p>}
-                  <Button
-                    type="submit"
-                    className="w-full"
-                    disabled={
-                      prereq.disabled ||
-                      xrpList.length === 0 ||
-                      loading ||
-                      !tokenId ||
-                      !tokenAmount ||
-                      !selectedAddress ||
-                      (selectedBalance != null && Number(tokenAmount) > selectedBalance.balance)
-                    }
-                  >
-                    {loading ? t("common.processing") : t("withdraw.withdrawButton")}
-                  </Button>
+            <form
+              onSubmit={handleSubmit}
+              className={cn(
+                "space-y-4",
+                (prereq.disabled || xrpList.length === 0) && "cursor-not-allowed opacity-50 [&_*]:pointer-events-none",
+              )}
+            >
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
+                <div className="flex-1 rounded-2xl border p-4">
+                  <p className="text-muted-foreground text-xs">{t("withdraw.tokenLabel")}</p>
+                  <Select value={tokenId || undefined} onValueChange={setTokenId}>
+                    <SelectTrigger className="mt-1 w-full">
+                      <SelectValue placeholder={t("withdraw.tokenSelect")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {tokens.map((tk) => (
+                        <SelectItem key={tk.tokenId} value={tk.tokenId}>
+                          {tk.currency} - {tk.issuerAddress}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="mt-3 text-muted-foreground text-xs">{t("withdraw.tokenAmount")}</p>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={selectedBalance?.balance ?? undefined}
+                    step="any"
+                    value={tokenAmount}
+                    onChange={(e) => setTokenAmount(e.target.value)}
+                    placeholder={t("withdraw.quantityPlaceholder")}
+                    className="mt-1"
+                    required
+                  />
+                  <p className="mt-2 text-muted-foreground text-xs">
+                    {t("exchange.availableBalance")}:{" "}
+                    {tokenId && selectedBalance
+                      ? `${formatTokenAmount(selectedBalance.balance)} ${tokens.find((tk) => tk.tokenId === tokenId)?.currency ?? ""}`
+                      : "--"}
+                  </p>
+                  {tokenAmount && selectedBalance && Number(tokenAmount) > selectedBalance.balance && (
+                    <p className="mt-1 text-destructive text-xs">{t("common.insufficientBalance")}</p>
+                  )}
+                </div>
+                <div className="flex items-center justify-center">
+                  <ArrowRight className="h-5 w-5 rotate-90 text-muted-foreground sm:rotate-0" />
+                </div>
+                <div className="flex-1 rounded-2xl border p-4">
+                  <p className="text-muted-foreground text-xs">{t("withdraw.destinationAddress")}</p>
+                  <Select value={selectedAddress || undefined} onValueChange={setSelectedAddress}>
+                    <SelectTrigger className="mt-1 w-full">
+                      <SelectValue placeholder={t("withdraw.destinationAddress")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {xrpList.map((item) => (
+                        <SelectItem key={item.address} value={item.address}>
+                          {item.label} - {item.address}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
+              {error && <p className="text-destructive text-sm">{error}</p>}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={
+                  prereq.disabled ||
+                  xrpList.length === 0 ||
+                  loading ||
+                  !tokenId ||
+                  !tokenAmount ||
+                  !selectedAddress ||
+                  (selectedBalance != null && Number(tokenAmount) > selectedBalance.balance)
+                }
+              >
+                {loading ? t("common.processing") : t("withdraw.withdrawButton")}
+              </Button>
             </form>
           )}
         </CardContent>

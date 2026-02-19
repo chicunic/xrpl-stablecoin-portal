@@ -1,4 +1,35 @@
-export type TransactionType = "deposit" | "withdrawal" | "exchange_in" | "exchange_out" | "refund";
+export type TransactionType = "deposit" | "withdrawal" | "exchange_in" | "exchange_out" | "refund" | "invoice_payment";
+
+export type InvoiceStatus = "draft" | "pending" | "paid" | "failed" | "cancelled";
+
+export type InvoiceType = "issued" | "received";
+
+export interface Invoice {
+  invoiceId: string;
+  userId: string;
+  type: InvoiceType;
+  tokenId: string;
+  amount: number;
+  recipientAddress: string;
+  recipientName: string;
+  description: string;
+  dueDate?: string;
+  status: InvoiceStatus;
+  xrplTxHash?: string;
+  failureReason?: string;
+  createdAt: string;
+  updatedAt: string;
+  paidAt?: string;
+}
+
+export interface ParsedInvoiceData {
+  tokenId: string;
+  amount: number;
+  recipientAddress: string;
+  recipientName: string;
+  description: string;
+  dueDate?: string;
+}
 
 export interface BankAccount {
   bankCode: string;

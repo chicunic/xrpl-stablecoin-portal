@@ -1,5 +1,5 @@
 import type { TotpSecret } from "firebase/auth";
-import { Trash2 } from "lucide-react";
+import { ShieldCheck, Trash2, User, Users, Wallet } from "lucide-react";
 import { useEffect, useState } from "react";
 import { KycDialog } from "@/components/KycDialog";
 import { MfaSetupDialog } from "@/components/MfaSetupDialog";
@@ -8,7 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { useI18n } from "@/i18n";
 import { setupWallet } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -90,7 +89,10 @@ export function SettingsPage() {
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-6">
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">{t("settings.accountInfo")}</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <User className="h-4 w-4 text-primary" />
+            {t("settings.accountInfo")}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2 text-sm">
@@ -123,11 +125,12 @@ export function SettingsPage() {
         </CardContent>
       </Card>
 
-      <Separator />
-
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">{t("settings.walletSetup")}</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Wallet className="h-4 w-4 text-primary" />
+            {t("settings.walletSetup")}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {address ? (
@@ -151,11 +154,12 @@ export function SettingsPage() {
         </CardContent>
       </Card>
 
-      <Separator />
-
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">{t("settings.mfaTitle")}</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <ShieldCheck className="h-4 w-4 text-primary" />
+            {t("settings.mfaTitle")}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {hasTotpMfa ? (
@@ -180,8 +184,6 @@ export function SettingsPage() {
           refreshAll();
         }}
       />
-
-      <Separator />
 
       <AdminCard />
     </div>
@@ -236,7 +238,10 @@ function AdminCard() {
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base">{t("admin.title")}</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Users className="h-4 w-4 text-primary" />
+            {t("admin.title")}
+          </CardTitle>
           <Button variant="outline" size="sm" onClick={() => setShowAdd(!showAdd)}>
             {showAdd ? t("common.cancel") : t("admin.addOperator")}
           </Button>
@@ -308,7 +313,7 @@ function AdminCard() {
                   </div>
                   <div className="mt-1 flex flex-wrap gap-1">
                     {op.allowedOperations.map((aop) => (
-                      <span key={aop} className="rounded bg-muted px-1.5 py-0.5 text-xs">
+                      <span key={aop} className="rounded-full bg-primary/10 px-2 py-0.5 text-primary text-xs">
                         {t(OP_LABEL_KEYS[aop])}
                       </span>
                     ))}

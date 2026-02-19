@@ -1,4 +1,4 @@
-import { ArrowLeftRight, Download, Home, List, Settings, Shield, Upload } from "lucide-react";
+import { ArrowLeftRight, Download, FileText, Home, List, Settings, Shield, Upload } from "lucide-react";
 import { type ComponentType, useEffect, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
@@ -18,6 +18,7 @@ const allTabs: TabDef[] = [
   { path: "/deposit", labelKey: "nav.deposit", icon: Download },
   { path: "/withdraw", labelKey: "nav.withdraw", icon: Upload },
   { path: "/exchange", labelKey: "nav.exchange", icon: ArrowLeftRight },
+  { path: "/invoices", labelKey: "nav.invoices", icon: FileText },
   { path: "/whitelist", labelKey: "nav.whitelist", icon: Shield },
   { path: "/orders", labelKey: "nav.orders", icon: List },
   { path: "/settings", labelKey: "nav.settings", icon: Settings },

@@ -12,12 +12,27 @@ import { useI18n } from "@/i18n";
 import { getVirtualAccount, setupVirtualAccount } from "@/lib/api";
 import { getBankName, getBranchName } from "@/lib/banks";
 import { useAuthContext } from "@/lib/useAuthContext";
+import { cn } from "@/lib/utils";
 
 function FiatDepositTab() {
   const { user, refreshAll, virtualAccount, setVirtualAccount } = useAuthContext();
   const { t } = useI18n();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  function handleCopyBankInfo() {
+    if (!virtualAccount) return;
+    const text = [
+      `${t("deposit.bankName")}: ${getBankName(virtualAccount.bankCode)}`,
+      `${t("deposit.branchName")}: ${getBranchName(virtualAccount.branchCode)}`,
+      `${t("deposit.accountNumber")}: ${virtualAccount.accountNumber}`,
+      `${t("deposit.accountHolder")}: ${virtualAccount.accountHolder}`,
+    ].join("\n");
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
 
   useEffect(() => {
     if (user.hasVirtualAccount && !virtualAccount) {
@@ -44,7 +59,10 @@ function FiatDepositTab() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">{t("deposit.fiatTitle")}</CardTitle>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Banknote className="h-4 w-4 text-emerald-600" />
+          {t("deposit.fiatTitle")}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         {!virtualAccount && (
@@ -65,7 +83,10 @@ function FiatDepositTab() {
           </div>
         )}
         <div
-          className={`rounded-2xl border p-4 space-y-4${!virtualAccount ? "cursor-not-allowed opacity-50 [&_*]:pointer-events-none" : ""}`}
+          className={cn(
+            "space-y-4 rounded-2xl border p-4",
+            !virtualAccount && "cursor-not-allowed opacity-50 [&_*]:pointer-events-none",
+          )}
         >
           <p className="text-muted-foreground text-sm">{t("deposit.fiatDescription")}</p>
           <div className="flex justify-center">
@@ -88,6 +109,14 @@ function FiatDepositTab() {
               </div>
             </div>
           </div>
+          {virtualAccount && (
+            <div className="flex justify-center">
+              <Button variant="outline" size="sm" className="w-72" onClick={handleCopyBankInfo}>
+                <Copy className="mr-1.5 h-3 w-3" />
+                {copied ? t("common.copiedToClipboard") : t("deposit.copyBankInfo")}
+              </Button>
+            </div>
+          )}
           <p className="text-muted-foreground text-xs">{t("deposit.fiatConfirmNote")}</p>
         </div>
       </CardContent>
@@ -115,7 +144,10 @@ function XrpDepositTab() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">{t("deposit.xrpTitle")}</CardTitle>
+        <CardTitle className="flex items-center gap-2 text-base">
+          <QrCode className="h-4 w-4 text-emerald-600" />
+          {t("deposit.xrpTitle")}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -135,7 +167,10 @@ function XrpDepositTab() {
           )}
 
           <div
-            className={`rounded-2xl border p-4 space-y-4${!address ? "cursor-not-allowed opacity-50 [&_*]:pointer-events-none" : ""}`}
+            className={cn(
+              "space-y-4 rounded-2xl border p-4",
+              !address && "cursor-not-allowed opacity-50 [&_*]:pointer-events-none",
+            )}
           >
             <div className="space-y-2">
               <Label>{t("deposit.tokenLabel")}</Label>

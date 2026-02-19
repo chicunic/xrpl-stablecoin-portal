@@ -48,7 +48,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-svh flex-col bg-gray-50">
+    <div className="flex min-h-svh flex-col bg-gradient-to-b from-primary/5 to-gray-50">
       <Header />
 
       <main className="flex flex-1 items-center justify-center px-4">

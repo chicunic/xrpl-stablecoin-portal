@@ -1,4 +1,4 @@
-import { Trash2 } from "lucide-react";
+import { Globe, Landmark, Trash2 } from "lucide-react";
 import { type SubmitEvent, useCallback, useEffect, useRef, useState } from "react";
 import { OperationMfaDialog } from "@/components/OperationMfaDialog";
 import { PrerequisiteAlerts, usePrerequisites } from "@/components/PrerequisiteGuard";
@@ -110,7 +110,10 @@ function XrpWhitelistTab({
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base">{t("whitelist.xrpTitle")}</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Globe className="h-4 w-4 text-primary" />
+              {t("whitelist.xrpTitle")}
+            </CardTitle>
             <Button variant="outline" size="sm" disabled={prereq.disabled} onClick={() => setShowAdd(!showAdd)}>
               {showAdd ? t("common.cancel") : t("common.add")}
             </Button>
@@ -335,7 +338,10 @@ function BankWhitelistTab({
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base">{t("whitelist.bankTitle")}</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Landmark className="h-4 w-4 text-primary" />
+              {t("whitelist.bankTitle")}
+            </CardTitle>
             <Button variant="outline" size="sm" disabled={prereq.disabled} onClick={() => setShowAdd(!showAdd)}>
               {showAdd ? t("common.cancel") : t("common.add")}
             </Button>

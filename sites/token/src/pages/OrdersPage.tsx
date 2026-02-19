@@ -7,9 +7,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useI18n } from "@/i18n";
 import { getFiatTransactions, getXrpTransactions } from "@/lib/api";
 import { formatCurrency, formatDate, formatTokenAmount, isIncomeType, txTypeLabel } from "@/lib/format";
-import type { FiatTransaction, XrpTransaction } from "@/lib/types";
+import type { FiatTransaction, TransactionType, XrpTransaction } from "@/lib/types";
 import { useAuthContext } from "@/lib/useAuthContext";
 import { explorerTxUrl } from "@/lib/xrpl";
+
+function txBadgeClass(type: TransactionType): string {
+  if (isIncomeType(type)) return "bg-green-100 text-green-700";
+  return "bg-amber-100 text-amber-700";
+}
 
 function XrpTransactionsTab() {
   const { t } = useI18n();
@@ -43,7 +48,7 @@ function XrpTransactionsTab() {
                 <div key={tx.transactionId} className="flex items-center gap-3 px-4 py-3">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="shrink-0 text-xs">
+                      <Badge variant="secondary" className={`shrink-0 text-xs ${txBadgeClass(tx.type)}`}>
                         {txTypeLabel(tx.type, t)}
                       </Badge>
                       <span className="truncate text-sm">{tx.description}</span>
@@ -93,7 +98,7 @@ function XrpTransactionsTab() {
                     <TableRow key={tx.transactionId}>
                       <TableCell className="text-muted-foreground text-xs">{formatDate(tx.createdAt)}</TableCell>
                       <TableCell>
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge variant="secondary" className={`text-xs ${txBadgeClass(tx.type)}`}>
                           {txTypeLabel(tx.type, t)}
                         </Badge>
                       </TableCell>
@@ -161,7 +166,7 @@ function FiatTransactionsTab() {
                 <div key={tx.transactionId} className="flex items-center gap-3 px-4 py-3">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="shrink-0 text-xs">
+                      <Badge variant="secondary" className={`shrink-0 text-xs ${txBadgeClass(tx.type)}`}>
                         {txTypeLabel(tx.type, t)}
                       </Badge>
                       <span className="truncate text-sm">{tx.description}</span>
@@ -198,7 +203,7 @@ function FiatTransactionsTab() {
                     <TableRow key={tx.transactionId}>
                       <TableCell className="text-muted-foreground text-xs">{formatDate(tx.createdAt)}</TableCell>
                       <TableCell>
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge variant="secondary" className={`text-xs ${txBadgeClass(tx.type)}`}>
                           {txTypeLabel(tx.type, t)}
                         </Badge>
                       </TableCell>

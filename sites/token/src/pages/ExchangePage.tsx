@@ -13,6 +13,7 @@ import { exchangeFiatToXrp, exchangeXrpToFiat, getXrpBalance } from "@/lib/api";
 import { formatCurrency, formatTokenAmount } from "@/lib/format";
 import type { ExchangeOrder, Token, TrustlineInfo, User } from "@/lib/types";
 import { useAuthContext } from "@/lib/useAuthContext";
+import { cn } from "@/lib/utils";
 import { explorerTxUrl } from "@/lib/xrpl";
 
 interface TokenBalanceDisplay extends TrustlineInfo {
@@ -99,7 +100,8 @@ function ExchangeForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <ArrowRight className="h-4 w-4 text-amber-600" />
           {isFiatToToken ? t("exchange.fiatToToken") : t("exchange.tokenToFiat")}
         </CardTitle>
       </CardHeader>
@@ -148,9 +150,12 @@ function ExchangeForm({
             </div>
           </div>
         ) : (
-          <form onSubmit={handleSubmit}>
+          <form
+            onSubmit={handleSubmit}
+            className={cn("space-y-4", prereq.disabled && "cursor-not-allowed opacity-50 [&_*]:pointer-events-none")}
+          >
             {isFiatToToken && tokenId && !hasTrustline && (
-              <div className="mb-4 flex items-center justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+              <div className="flex items-center justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <Link className="h-5 w-5 text-amber-600" />
@@ -178,36 +183,52 @@ function ExchangeForm({
                 fetchBalances();
               }}
             />
-            <div
-              className={`rounded-2xl border p-4 space-y-4${prereq.disabled ? "cursor-not-allowed opacity-50 [&_*]:pointer-events-none" : ""}`}
-            >
-              <div className="flex items-stretch gap-3">
-                {isFiatToToken ? (
-                  <>
-                    <div className="flex-1 rounded-2xl border p-4">
-                      <p className="text-muted-foreground text-xs">{t("exchange.amountYen")}</p>
-                      <Input
-                        type="number"
-                        min={1}
-                        max={user.fiatBalance}
-                        step={1}
-                        value={amount}
-                        onChange={(e) => setAmount(e.target.value)}
-                        placeholder={t("exchange.amountPlaceholder")}
-                        className="mt-1"
-                        required
-                      />
-                      <p className="mt-2 text-muted-foreground text-xs">
-                        {t("exchange.availableBalance")}: {formatCurrency(user.fiatBalance)}
-                      </p>
-                      {amount && Number(amount) > user.fiatBalance && (
-                        <p className="mt-1 text-destructive text-xs">{t("common.insufficientBalance")}</p>
-                      )}
-                    </div>
-                    <div className="flex items-center">
-                      <ArrowRight className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                    <div className="flex-1 rounded-2xl border p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
+              {isFiatToToken ? (
+                <>
+                  <div className="flex-1 rounded-2xl border p-4">
+                    <p className="text-muted-foreground text-xs">{t("exchange.amountYen")}</p>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={user.fiatBalance}
+                      step={1}
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      placeholder={t("exchange.amountPlaceholder")}
+                      className="mt-1"
+                      required
+                    />
+                    <p className="mt-2 text-muted-foreground text-xs">
+                      {t("exchange.availableBalance")}: {formatCurrency(user.fiatBalance)}
+                    </p>
+                    {amount && Number(amount) > user.fiatBalance && (
+                      <p className="mt-1 text-destructive text-xs">{t("common.insufficientBalance")}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <ArrowRight className="h-5 w-5 rotate-90 text-muted-foreground sm:rotate-0" />
+                  </div>
+                  <div className="flex-1 rounded-2xl border p-4">
+                    <p className="text-muted-foreground text-xs">{t("exchange.tokenLabel")}</p>
+                    <Select value={tokenId || undefined} onValueChange={handleTokenChange}>
+                      <SelectTrigger className="mt-1 w-full">
+                        <SelectValue placeholder={t("exchange.tokenSelect")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {tokens.map((tk) => (
+                          <SelectItem key={tk.tokenId} value={tk.tokenId}>
+                            {tk.currency} - {tk.issuerAddress}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex-1 space-y-3 rounded-2xl border p-4">
+                    <div>
                       <p className="text-muted-foreground text-xs">{t("exchange.tokenLabel")}</p>
                       <Select value={tokenId || undefined} onValueChange={handleTokenChange}>
                         <SelectTrigger className="mt-1 w-full">
@@ -222,78 +243,58 @@ function ExchangeForm({
                         </SelectContent>
                       </Select>
                     </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="flex-1 space-y-3 rounded-2xl border p-4">
-                      <div>
-                        <p className="text-muted-foreground text-xs">{t("exchange.tokenLabel")}</p>
-                        <Select value={tokenId || undefined} onValueChange={handleTokenChange}>
-                          <SelectTrigger className="mt-1 w-full">
-                            <SelectValue placeholder={t("exchange.tokenSelect")} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {tokens.map((tk) => (
-                              <SelectItem key={tk.tokenId} value={tk.tokenId}>
-                                {tk.currency} - {tk.issuerAddress}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground text-xs">{t("exchange.tokenAmount")}</p>
-                        <Input
-                          type="number"
-                          min={1}
-                          max={selectedBalance?.balance ?? undefined}
-                          step="any"
-                          value={amount}
-                          onChange={(e) => setAmount(e.target.value)}
-                          placeholder={t("exchange.quantityPlaceholder")}
-                          className="mt-1"
-                          required
-                        />
-                        <p className="mt-2 text-muted-foreground text-xs">
-                          {t("exchange.availableBalance")}:{" "}
-                          {tokenId && selectedBalance
-                            ? `${formatTokenAmount(selectedBalance.balance)} ${selectedToken?.currency ?? ""}`
-                            : "--"}
-                        </p>
-                        {amount && selectedBalance && Number(amount) > selectedBalance.balance && (
-                          <p className="mt-1 text-destructive text-xs">{t("common.insufficientBalance")}</p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center">
-                      <ArrowRight className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                    <div className="flex-1 rounded-2xl border p-4">
-                      <p className="text-muted-foreground text-xs">{t("orders.fiatTab")}</p>
-                      <p className="mt-2 text-muted-foreground text-sm">
-                        {amount ? formatCurrency(Number(amount)) : "--"}
+                    <div>
+                      <p className="text-muted-foreground text-xs">{t("exchange.tokenAmount")}</p>
+                      <Input
+                        type="number"
+                        min={1}
+                        max={selectedBalance?.balance ?? undefined}
+                        step="any"
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                        placeholder={t("exchange.quantityPlaceholder")}
+                        className="mt-1"
+                        required
+                      />
+                      <p className="mt-2 text-muted-foreground text-xs">
+                        {t("exchange.availableBalance")}:{" "}
+                        {tokenId && selectedBalance
+                          ? `${formatTokenAmount(selectedBalance.balance)} ${selectedToken?.currency ?? ""}`
+                          : "--"}
                       </p>
+                      {amount && selectedBalance && Number(amount) > selectedBalance.balance && (
+                        <p className="mt-1 text-destructive text-xs">{t("common.insufficientBalance")}</p>
+                      )}
                     </div>
-                  </>
-                )}
-              </div>
-              {error && <p className="text-destructive text-sm">{error}</p>}
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={
-                  prereq.disabled ||
-                  loading ||
-                  !tokenId ||
-                  !amount ||
-                  !hasTrustline ||
-                  (isFiatToToken && Number(amount) > user.fiatBalance) ||
-                  (!isFiatToToken && selectedBalance != null && Number(amount) > selectedBalance.balance)
-                }
-              >
-                {loading ? t("common.processing") : t("exchange.exchangeButton")}
-              </Button>
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <ArrowRight className="h-5 w-5 rotate-90 text-muted-foreground sm:rotate-0" />
+                  </div>
+                  <div className="flex-1 rounded-2xl border p-4">
+                    <p className="text-muted-foreground text-xs">{t("orders.fiatTab")}</p>
+                    <p className="mt-2 text-muted-foreground text-sm">
+                      {amount ? formatCurrency(Number(amount)) : "--"}
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
+            {error && <p className="text-destructive text-sm">{error}</p>}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={
+                prereq.disabled ||
+                loading ||
+                !tokenId ||
+                !amount ||
+                !hasTrustline ||
+                (isFiatToToken && Number(amount) > user.fiatBalance) ||
+                (!isFiatToToken && selectedBalance != null && Number(amount) > selectedBalance.balance)
+              }
+            >
+              {loading ? t("common.processing") : t("exchange.exchangeButton")}
+            </Button>
           </form>
         )}
       </CardContent>

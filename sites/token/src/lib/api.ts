@@ -84,7 +84,9 @@ import type {
   ExchangeOrder,
   FiatTransaction,
   FiatWithdrawalResult,
+  Invoice,
   KycInfo,
+  ParsedInvoiceData,
   Token,
   TrustlineInfo,
   User,
@@ -263,6 +265,64 @@ export function submitKyc(data: {
   return request<KycInfo>("/api/v1/users/me/kyc", {
     method: "POST",
     body: JSON.stringify(data),
+  });
+}
+
+export function createInvoice(data: {
+  type: "issued" | "received";
+  tokenId: string;
+  amount: number;
+  recipientAddress: string;
+  recipientName: string;
+  description: string;
+  dueDate?: string;
+}) {
+  return request<Invoice>("/api/v1/invoices", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function parseInvoicePdf(pdf: File): Promise<ParsedInvoiceData> {
+  const formData = new FormData();
+  formData.append("pdf", pdf);
+
+  const headers: Record<string, string> = {};
+  const token = getSessionToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  const res = await fetch(`${API_BASE}/api/v1/invoices/parse-pdf`, {
+    method: "POST",
+    headers,
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ error: "Unknown error" }));
+    throw new Error(body.error ?? `HTTP ${res.status}`);
+  }
+
+  return res.json();
+}
+
+export function listInvoices(type?: "issued" | "received") {
+  const query = type ? `?type=${type}` : "";
+  return request<Invoice[]>(`/api/v1/invoices${query}`);
+}
+
+export function getInvoice(invoiceId: string) {
+  return request<Invoice>(`/api/v1/invoices/${invoiceId}`);
+}
+
+export function payInvoice(invoiceId: string) {
+  return request<Invoice>(`/api/v1/invoices/${invoiceId}/pay`, {
+    method: "POST",
+  });
+}
+
+export function cancelInvoice(invoiceId: string) {
+  return request<Invoice>(`/api/v1/invoices/${invoiceId}/cancel`, {
+    method: "POST",
   });
 }
 

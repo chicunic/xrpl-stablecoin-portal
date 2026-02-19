@@ -1,4 +1,4 @@
-import { Coins, Link, ShieldCheck, ShieldX } from "lucide-react";
+import { Coins, Link, ShieldCheck, ShieldX, Wallet } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { TrustLineDialog } from "@/components/TrustLineDialog";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { formatCurrency, formatTokenAmount } from "@/lib/format";
 import { useAuthContext } from "@/lib/useAuthContext";
 
 export function DashboardPage() {
-  const { user, address, trustlines, refreshTrustlines } = useAuthContext();
+  const { address, trustlines, refreshTrustlines } = useAuthContext();
   const { t } = useI18n();
   const [fiatBalance, setFiatBalance] = useState<number>(0);
   const [balanceMap, setBalanceMap] = useState<Map<string, number>>(new Map());
@@ -43,49 +43,34 @@ export function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-6">
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">{t("dashboard.accountInfo")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
-            <div>
-              <p className="text-muted-foreground">{t("dashboard.email")}</p>
-              <p className="truncate">{user.email}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">{t("dashboard.displayName")}</p>
-              <p>{user.name || "-"}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card>
+        <Card className="bg-gradient-to-br from-primary/5 to-primary/10 ring-primary/20">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">{t("dashboard.totalBalance")}</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Wallet className="h-4 w-4 text-primary" />
+              {t("dashboard.totalBalance")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center font-semibold text-3xl tabular-nums">
+            <p className="text-center font-semibold text-4xl text-primary tabular-nums">
               {formatCurrency(fiatBalance + tokenDisplays.reduce((sum, b) => sum + b.balance, 0))}
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-gradient-to-br from-emerald-50/80 to-emerald-100/40 ring-emerald-200/50">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">{t("dashboard.fiatBalance")}</CardTitle>
+            <CardTitle className="text-emerald-700 text-sm">{t("dashboard.fiatBalance")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center font-semibold text-3xl tabular-nums">{formatCurrency(fiatBalance)}</p>
+            <p className="text-center font-semibold text-2xl tabular-nums">{formatCurrency(fiatBalance)}</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="bg-gradient-to-br from-blue-50/80 to-blue-100/40 ring-blue-200/50">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">{t("dashboard.tokenBalance")}</CardTitle>
+            <CardTitle className="text-blue-700 text-sm">{t("dashboard.tokenBalance")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center font-semibold text-3xl tabular-nums">
+            <p className="text-center font-semibold text-2xl tabular-nums">
               {formatCurrency(tokenDisplays.reduce((sum, b) => sum + b.balance, 0))}
             </p>
           </CardContent>
@@ -94,7 +79,10 @@ export function DashboardPage() {
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">{t("dashboard.tokenList")}</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Coins className="h-4 w-4 text-primary" />
+            {t("dashboard.tokenList")}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {tokenDisplays.length === 0 ? (
