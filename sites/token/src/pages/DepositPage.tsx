@@ -6,6 +6,7 @@ import { TrustLineDialog } from "@/components/TrustLineDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useI18n } from "@/i18n";
 import { getVirtualAccount, setupVirtualAccount } from "@/lib/api";
@@ -48,7 +49,7 @@ function FiatDepositTab() {
       <CardContent>
         {!virtualAccount && (
           <div className="mb-4 space-y-2">
-            <div className="flex items-center justify-between gap-4 rounded-md border border-amber-200 bg-amber-50 p-4">
+            <div className="flex items-center justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <Banknote className="h-5 w-5 text-amber-600" />
@@ -64,11 +65,11 @@ function FiatDepositTab() {
           </div>
         )}
         <div
-          className={`rounded-md border p-4 space-y-4${!virtualAccount ? "cursor-not-allowed opacity-50 [&_*]:pointer-events-none" : ""}`}
+          className={`rounded-2xl border p-4 space-y-4${!virtualAccount ? "cursor-not-allowed opacity-50 [&_*]:pointer-events-none" : ""}`}
         >
           <p className="text-muted-foreground text-sm">{t("deposit.fiatDescription")}</p>
           <div className="flex justify-center">
-            <div className="w-72 space-y-2 rounded-md border p-3 text-sm">
+            <div className="w-72 space-y-2 rounded-2xl border p-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">{t("deposit.bankName")}</span>
                 <span>{virtualAccount ? getBankName(virtualAccount.bankCode) : "--"}</span>
@@ -119,7 +120,7 @@ function XrpDepositTab() {
       <CardContent>
         <div className="space-y-4">
           {!address && (
-            <div className="flex items-center justify-between gap-4 rounded-md border border-amber-200 bg-amber-50 p-4">
+            <div className="flex items-center justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <Wallet className="h-5 w-5 text-amber-600" />
@@ -134,29 +135,26 @@ function XrpDepositTab() {
           )}
 
           <div
-            className={`rounded-md border p-4 space-y-4${!address ? "cursor-not-allowed opacity-50 [&_*]:pointer-events-none" : ""}`}
+            className={`rounded-2xl border p-4 space-y-4${!address ? "cursor-not-allowed opacity-50 [&_*]:pointer-events-none" : ""}`}
           >
             <div className="space-y-2">
               <Label>{t("deposit.tokenLabel")}</Label>
-              <select
-                value={tokenId}
-                onChange={(e) => setTokenId(e.target.value)}
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-                required
-              >
-                <option value="" disabled>
-                  {t("deposit.tokenSelect")}
-                </option>
-                {tokens.map((tk) => (
-                  <option key={tk.tokenId} value={tk.tokenId}>
-                    {tk.currency} - {tk.issuerAddress}
-                  </option>
-                ))}
-              </select>
+              <Select value={tokenId || undefined} onValueChange={setTokenId}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={t("deposit.tokenSelect")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {tokens.map((tk) => (
+                    <SelectItem key={tk.tokenId} value={tk.tokenId}>
+                      {tk.currency} - {tk.issuerAddress}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {tokenId && !hasTrustline && (
-              <div className="flex items-center justify-between gap-4 rounded-md border border-amber-200 bg-amber-50 p-4">
+              <div className="flex items-center justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <Link className="h-5 w-5 text-amber-600" />
@@ -179,12 +177,12 @@ function XrpDepositTab() {
 
             <p className="text-muted-foreground text-sm">{t("deposit.xrpSendDescription")}</p>
             <div className="flex justify-center">
-              <div className="space-y-4 rounded-md border p-6 text-center">
+              <div className="space-y-4 rounded-2xl border p-6 text-center">
                 <div className="flex justify-center">
                   {address ? (
                     <QRCodeSVG value={address} size={200} />
                   ) : (
-                    <div className="flex h-[200px] w-[200px] items-center justify-center rounded-lg border border-dashed">
+                    <div className="flex h-[200px] w-[200px] items-center justify-center rounded-2xl border border-dashed">
                       <QrCode className="h-12 w-12 text-muted-foreground/40" />
                     </div>
                   )}

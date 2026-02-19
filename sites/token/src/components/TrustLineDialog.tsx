@@ -55,7 +55,7 @@ export function TrustLineDialog({ tokenId, open, onOpenChange, onSuccess }: Trus
         </DialogHeader>
 
         {token && (
-          <div className="space-y-3 rounded-md border p-3 text-sm">
+          <div className="space-y-3 rounded-2xl border p-3 text-sm">
             <div>
               <p className="text-muted-foreground">{t("trustline.account")}</p>
               <p className="truncate font-mono text-xs">{address}</p>

@@ -54,7 +54,7 @@ export function LoginPage() {
       <main className="flex flex-1 items-center justify-center px-4">
         <Card className="w-full max-w-sm">
           <CardHeader className="text-center">
-            <img src="/logo-full.png" alt="NexBridge" className="mx-auto mb-2 h-10" />
+            <img src="/logo-full.svg" alt="NexBridge" className="mx-auto mb-2 h-10" />
             <CardTitle className="text-xl">{t("login.title")}</CardTitle>
           </CardHeader>
           <CardContent className="flex min-h-[160px] flex-col items-stretch justify-center space-y-4">
@@ -69,13 +69,13 @@ export function LoginPage() {
                     if (v.length === 6) requestAnimationFrame(() => formRef.current?.requestSubmit());
                   }}
                   autoFocus
-                  containerClassName="justify-between gap-2"
+                  containerClassName="justify-center"
                 >
-                  {Array.from({ length: 6 }, (_, i) => (
-                    <InputOTPGroup key={i} className="flex-1">
-                      <InputOTPSlot index={i} className="w-full rounded-md border" />
-                    </InputOTPGroup>
-                  ))}
+                  <InputOTPGroup>
+                    {Array.from({ length: 6 }, (_, i) => (
+                      <InputOTPSlot key={i} index={i} />
+                    ))}
+                  </InputOTPGroup>
                 </InputOTP>
                 <Button type="submit" className="w-full" disabled={mfaLoading || mfaCode.length !== 6}>
                   {mfaLoading ? t("login.mfaVerifying") : t("login.mfaVerify")}

@@ -27,7 +27,7 @@ export function Header({ name }: { name?: string }) {
           onClick={handleHome}
           className="flex items-center gap-2 transition-opacity hover:opacity-70 sm:gap-3"
         >
-          <img src="/logo-full.png" alt="NexBridge" className="h-7 sm:h-8" />
+          <img src="/logo-full.svg" alt="NexBridge" className="h-7 sm:h-8" />
           <Separator orientation="vertical" className="hidden h-5 sm:block" />
           <span className="hidden text-muted-foreground text-sm sm:inline">{t("header.subtitle")}</span>
         </button>

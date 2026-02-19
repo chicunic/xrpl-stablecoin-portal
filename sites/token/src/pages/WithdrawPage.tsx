@@ -6,6 +6,7 @@ import { PrerequisiteAlerts, usePrerequisites } from "@/components/PrerequisiteG
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useI18n } from "@/i18n";
 import {
@@ -107,7 +108,7 @@ function FiatWithdrawForm({
         <CardContent>
           <PrerequisiteAlerts needsKyc={prereq.needsKyc} needsMfa={prereq.needsMfa} onKycComplete={onKycComplete} />
           {bankList.length === 0 && !listLoading && (
-            <div className="mb-4 flex items-center justify-between gap-4 rounded-md border border-amber-200 bg-amber-50 p-4">
+            <div className="mb-4 flex items-center justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <Shield className="h-5 w-5 text-amber-600" />
@@ -141,11 +142,11 @@ function FiatWithdrawForm({
           ) : (
             <form onSubmit={handleSubmit}>
               <div
-                className={`rounded-lg border p-4 space-y-4${prereq.disabled || bankList.length === 0 ? "cursor-not-allowed opacity-50 [&_*]:pointer-events-none" : ""}`}
+                className={`rounded-2xl border p-4 space-y-4${prereq.disabled || bankList.length === 0 ? "cursor-not-allowed opacity-50 [&_*]:pointer-events-none" : ""}`}
               >
                 <div className="space-y-4">
                   <div className="flex items-stretch gap-3">
-                    <div className="flex-1 rounded-lg border p-4">
+                    <div className="flex-1 rounded-2xl border p-4">
                       <p className="text-muted-foreground text-xs">{t("withdraw.amountYen")}</p>
                       <Input
                         type="number"
@@ -168,28 +169,23 @@ function FiatWithdrawForm({
                     <div className="flex items-center">
                       <ArrowRight className="h-5 w-5 text-muted-foreground" />
                     </div>
-                    <div className="flex-1 rounded-lg border p-4">
+                    <div className="flex-1 rounded-2xl border p-4">
                       <p className="text-muted-foreground text-xs">{t("withdraw.destinationAccount")}</p>
-                      <select
-                        value={selectedBank}
-                        onChange={(e) => setSelectedBank(e.target.value)}
-                        className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-                        required
-                      >
-                        {bankList.length === 0 && (
-                          <option value="" disabled>
-                            {t("withdraw.destinationAccount")}
-                          </option>
-                        )}
-                        {bankList.map((b) => (
-                          <option
-                            key={`${b.branchCode}-${b.accountNumber}`}
-                            value={`${b.branchCode}-${b.accountNumber}`}
-                          >
-                            {b.label} - {getBankName(b.bankCode)} {getBranchName(b.branchCode)}/{b.accountNumber}
-                          </option>
-                        ))}
-                      </select>
+                      <Select value={selectedBank || undefined} onValueChange={setSelectedBank}>
+                        <SelectTrigger className="mt-1 w-full">
+                          <SelectValue placeholder={t("withdraw.destinationAccount")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {bankList.map((b) => (
+                            <SelectItem
+                              key={`${b.branchCode}-${b.accountNumber}`}
+                              value={`${b.branchCode}-${b.accountNumber}`}
+                            >
+                              {b.label} - {getBankName(b.bankCode)} {getBranchName(b.branchCode)}/{b.accountNumber}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                   {error && <p className="text-destructive text-sm">{error}</p>}
@@ -308,7 +304,7 @@ function XrpWithdrawForm({ prereq }: { prereq: { needsKyc: boolean; needsMfa: bo
         <CardContent>
           <PrerequisiteAlerts needsKyc={prereq.needsKyc} needsMfa={prereq.needsMfa} />
           {xrpList.length === 0 && !listLoading && (
-            <div className="mb-4 flex items-center justify-between gap-4 rounded-md border border-amber-200 bg-amber-50 p-4">
+            <div className="mb-4 flex items-center justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <Shield className="h-5 w-5 text-amber-600" />
@@ -347,27 +343,24 @@ function XrpWithdrawForm({ prereq }: { prereq: { needsKyc: boolean; needsMfa: bo
           ) : (
             <form onSubmit={handleSubmit}>
               <div
-                className={`rounded-lg border p-4 space-y-4${prereq.disabled || xrpList.length === 0 ? "cursor-not-allowed opacity-50 [&_*]:pointer-events-none" : ""}`}
+                className={`rounded-2xl border p-4 space-y-4${prereq.disabled || xrpList.length === 0 ? "cursor-not-allowed opacity-50 [&_*]:pointer-events-none" : ""}`}
               >
                 <div className="space-y-4">
                   <div className="flex items-stretch gap-3">
-                    <div className="flex-1 rounded-lg border p-4">
+                    <div className="flex-1 rounded-2xl border p-4">
                       <p className="text-muted-foreground text-xs">{t("withdraw.tokenLabel")}</p>
-                      <select
-                        value={tokenId}
-                        onChange={(e) => setTokenId(e.target.value)}
-                        className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-                        required
-                      >
-                        <option value="" disabled>
-                          {t("withdraw.tokenSelect")}
-                        </option>
-                        {tokens.map((tk) => (
-                          <option key={tk.tokenId} value={tk.tokenId}>
-                            {tk.currency} - {tk.issuerAddress}
-                          </option>
-                        ))}
-                      </select>
+                      <Select value={tokenId || undefined} onValueChange={setTokenId}>
+                        <SelectTrigger className="mt-1 w-full">
+                          <SelectValue placeholder={t("withdraw.tokenSelect")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {tokens.map((tk) => (
+                            <SelectItem key={tk.tokenId} value={tk.tokenId}>
+                              {tk.currency} - {tk.issuerAddress}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <p className="mt-3 text-muted-foreground text-xs">{t("withdraw.tokenAmount")}</p>
                       <Input
                         type="number"
@@ -393,25 +386,20 @@ function XrpWithdrawForm({ prereq }: { prereq: { needsKyc: boolean; needsMfa: bo
                     <div className="flex items-center">
                       <ArrowRight className="h-5 w-5 text-muted-foreground" />
                     </div>
-                    <div className="flex-1 rounded-lg border p-4">
+                    <div className="flex-1 rounded-2xl border p-4">
                       <p className="text-muted-foreground text-xs">{t("withdraw.destinationAddress")}</p>
-                      <select
-                        value={selectedAddress}
-                        onChange={(e) => setSelectedAddress(e.target.value)}
-                        className="mt-1 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-                        required
-                      >
-                        {xrpList.length === 0 && (
-                          <option value="" disabled>
-                            {t("withdraw.destinationAddress")}
-                          </option>
-                        )}
-                        {xrpList.map((item) => (
-                          <option key={item.address} value={item.address}>
-                            {item.label} - {item.address}
-                          </option>
-                        ))}
-                      </select>
+                      <Select value={selectedAddress || undefined} onValueChange={setSelectedAddress}>
+                        <SelectTrigger className="mt-1 w-full">
+                          <SelectValue placeholder={t("withdraw.destinationAddress")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {xrpList.map((item) => (
+                            <SelectItem key={item.address} value={item.address}>
+                              {item.label} - {item.address}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                   {error && <p className="text-destructive text-sm">{error}</p>}

@@ -102,7 +102,7 @@ export function DashboardPage() {
           ) : (
             <div className="space-y-3">
               {tokenDisplays.map((b) => (
-                <div key={b.tokenId} className="flex items-center gap-4 rounded-lg border p-4">
+                <div key={b.tokenId} className="flex items-center gap-4 rounded-2xl border p-4">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
                     <Coins className="h-5 w-5 text-primary" />
                   </div>

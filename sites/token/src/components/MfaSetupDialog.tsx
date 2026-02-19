@@ -98,13 +98,13 @@ export function MfaSetupDialog({ secret, onClose }: MfaSetupDialogProps) {
                 if (v.length === 6) handleFinalize(v);
               }}
               autoFocus
-              containerClassName="justify-center gap-2"
+              containerClassName="justify-center"
             >
-              {Array.from({ length: 6 }, (_, i) => (
-                <InputOTPGroup key={i}>
-                  <InputOTPSlot index={i} className="rounded-md border" />
-                </InputOTPGroup>
-              ))}
+              <InputOTPGroup>
+                {Array.from({ length: 6 }, (_, i) => (
+                  <InputOTPSlot key={i} index={i} />
+                ))}
+              </InputOTPGroup>
             </InputOTP>
             {error && <p className="text-destructive text-sm">{error}</p>}
             <Button type="submit" className="w-full" disabled={loading || totpCode.length !== 6}>

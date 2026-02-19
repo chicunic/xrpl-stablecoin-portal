@@ -86,7 +86,7 @@ export function AuthLayout() {
                 type="button"
                 key={tab.path}
                 onClick={() => navigate(tab.path)}
-                className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors ${
+                className={`inline-flex items-center gap-1.5 rounded-4xl px-3 py-1.5 text-sm transition-colors ${
                   active
                     ? "bg-primary/10 font-medium text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"

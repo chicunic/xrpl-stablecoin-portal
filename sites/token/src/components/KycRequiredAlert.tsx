@@ -14,7 +14,7 @@ export function KycRequiredAlert({ onSuccess }: KycRequiredAlertProps) {
 
   return (
     <>
-      <div className="flex items-center justify-between gap-4 rounded-md border border-blue-200 bg-blue-50 p-4">
+      <div className="flex items-center justify-between gap-4 rounded-4xl border border-blue-200 bg-blue-50 p-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <UserCheck className="h-5 w-5 text-blue-600" />

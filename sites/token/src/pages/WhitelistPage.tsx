@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useI18n } from "@/i18n";
 import {
@@ -119,7 +120,7 @@ function XrpWhitelistTab({
           <PrerequisiteAlerts needsKyc={prereq.needsKyc} needsMfa={prereq.needsMfa} onKycComplete={onKycComplete} />
           {error && <p className="mb-4 text-destructive text-sm">{error}</p>}
           {showAdd && (
-            <div className="mb-4 rounded-lg border p-4">
+            <div className="mb-4 rounded-2xl border p-4">
               <form onSubmit={handleAdd} className="space-y-3">
                 <div className="space-y-2">
                   <Label>{t("whitelist.addXrpLabel")}</Label>
@@ -151,33 +152,31 @@ function XrpWhitelistTab({
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
                     <Label>{t("whitelist.relationship")}</Label>
-                    <select
-                      value={relationship}
-                      onChange={(e) => setRelationship(e.target.value)}
-                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-                      required
-                    >
-                      <option value="" disabled />
-                      <option value="self">{t("whitelist.relationshipSelf")}</option>
-                      <option value="family">{t("whitelist.relationshipFamily")}</option>
-                      <option value="company">{t("whitelist.relationshipCompany")}</option>
-                      <option value="other">{t("whitelist.relationshipOther")}</option>
-                    </select>
+                    <Select value={relationship || undefined} onValueChange={setRelationship}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="self">{t("whitelist.relationshipSelf")}</SelectItem>
+                        <SelectItem value="family">{t("whitelist.relationshipFamily")}</SelectItem>
+                        <SelectItem value="company">{t("whitelist.relationshipCompany")}</SelectItem>
+                        <SelectItem value="other">{t("whitelist.relationshipOther")}</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label>{t("whitelist.purpose")}</Label>
-                    <select
-                      value={purpose}
-                      onChange={(e) => setPurpose(e.target.value)}
-                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-                      required
-                    >
-                      <option value="" disabled />
-                      <option value="investment">{t("whitelist.purposeInvestment")}</option>
-                      <option value="trade">{t("whitelist.purposeTrade")}</option>
-                      <option value="personal">{t("whitelist.purposePersonal")}</option>
-                      <option value="other">{t("whitelist.purposeOther")}</option>
-                    </select>
+                    <Select value={purpose || undefined} onValueChange={setPurpose}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="investment">{t("whitelist.purposeInvestment")}</SelectItem>
+                        <SelectItem value="trade">{t("whitelist.purposeTrade")}</SelectItem>
+                        <SelectItem value="personal">{t("whitelist.purposePersonal")}</SelectItem>
+                        <SelectItem value="other">{t("whitelist.purposeOther")}</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
                 <Button
@@ -195,7 +194,7 @@ function XrpWhitelistTab({
           ) : (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {list.map((item) => (
-                <div key={item.address} className="flex items-start gap-4 rounded-lg border p-4">
+                <div key={item.address} className="flex items-start gap-4 rounded-2xl border p-4">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-sm">{item.label}</span>
@@ -346,7 +345,7 @@ function BankWhitelistTab({
           <PrerequisiteAlerts needsKyc={prereq.needsKyc} needsMfa={prereq.needsMfa} onKycComplete={onKycComplete} />
           {error && <p className="mb-4 text-destructive text-sm">{error}</p>}
           {showAdd && (
-            <div className="mb-4 rounded-lg border p-4">
+            <div className="mb-4 rounded-2xl border p-4">
               <form onSubmit={handleAdd} className="space-y-3">
                 <div className="space-y-2">
                   <Label>{t("whitelist.label")}</Label>
@@ -359,37 +358,34 @@ function BankWhitelistTab({
                 </div>
                 <div className="space-y-2">
                   <Label>{t("whitelist.bankLabel")}</Label>
-                  <select
-                    value={bankCode}
-                    onChange={(e) => setBankCode(e.target.value)}
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-                    required
-                  >
-                    {Object.entries(BANKS).map(([code, name]) => (
-                      <option key={code} value={code}>
-                        {name} ({code})
-                      </option>
-                    ))}
-                  </select>
+                  <Select value={bankCode} onValueChange={setBankCode}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(BANKS).map(([code, name]) => (
+                        <SelectItem key={code} value={code}>
+                          {name} ({code})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
                     <Label>{t("whitelist.branchLabel")}</Label>
-                    <select
-                      value={branchCode}
-                      onChange={(e) => setBranchCode(e.target.value)}
-                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
-                      required
-                    >
-                      <option value="" disabled>
-                        {t("whitelist.branchSelect")}
-                      </option>
-                      {Object.entries(BRANCHES).map(([code, name]) => (
-                        <option key={code} value={code}>
-                          {name} ({code})
-                        </option>
-                      ))}
-                    </select>
+                    <Select value={branchCode || undefined} onValueChange={setBranchCode}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder={t("whitelist.branchSelect")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(BRANCHES).map(([code, name]) => (
+                          <SelectItem key={code} value={code}>
+                            {name} ({code})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label>{t("whitelist.accountNumber")}</Label>
@@ -427,7 +423,7 @@ function BankWhitelistTab({
               {list.map((item) => (
                 <div
                   key={`${item.branchCode}-${item.accountNumber}`}
-                  className="flex items-start gap-4 rounded-lg border p-4"
+                  className="flex items-start gap-4 rounded-2xl border p-4"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">

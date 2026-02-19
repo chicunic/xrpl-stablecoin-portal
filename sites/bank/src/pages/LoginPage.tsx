@@ -104,7 +104,7 @@ export function LoginPage() {
       <main className="flex flex-1 items-center justify-center px-4">
         <Card className="w-full max-w-sm">
           <CardHeader className="text-center">
-            <img src="/logo-full.png" alt="NexBridge" className="mx-auto mb-2 h-10" />
+            <img src="/logo-full.svg" alt="NexBridge" className="mx-auto mb-2 h-10" />
             <CardTitle className="text-xl">ログイン</CardTitle>
           </CardHeader>
           <CardContent>

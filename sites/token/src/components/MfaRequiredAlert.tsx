@@ -28,7 +28,7 @@ export function MfaRequiredAlert() {
 
   return (
     <>
-      <div className="flex items-center justify-between gap-4 rounded-md border border-amber-200 bg-amber-50 p-4">
+      <div className="flex items-center justify-between gap-4 rounded-4xl border border-amber-200 bg-amber-50 p-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <ShieldAlert className="h-5 w-5 text-amber-600" />

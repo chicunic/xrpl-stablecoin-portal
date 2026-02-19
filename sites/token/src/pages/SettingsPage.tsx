@@ -5,6 +5,7 @@ import { KycDialog } from "@/components/KycDialog";
 import { MfaSetupDialog } from "@/components/MfaSetupDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -243,7 +244,7 @@ function AdminCard() {
       </CardHeader>
       <CardContent>
         {showAdd && (
-          <div className="mb-4 rounded-lg border p-4">
+          <div className="mb-4 rounded-2xl border p-4">
             <form onSubmit={handleAdd} className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
@@ -269,12 +270,11 @@ function AdminCard() {
                 <Label>{t("admin.allowedOps")}</Label>
                 <div className="flex flex-wrap gap-3">
                   {ALL_OPS.map((op) => (
-                    <label key={op} className="flex items-center gap-1.5 text-sm">
-                      <input
-                        type="checkbox"
+                    <label key={op} htmlFor={`op-${op}`} className="flex items-center gap-1.5 text-sm">
+                      <Checkbox
+                        id={`op-${op}`}
                         checked={allowedOps.includes(op)}
-                        onChange={() => handleToggleOp(op)}
-                        className="rounded border-input"
+                        onCheckedChange={() => handleToggleOp(op)}
                       />
                       {t(OP_LABEL_KEYS[op])}
                     </label>
@@ -295,7 +295,7 @@ function AdminCard() {
         ) : (
           <div className="space-y-3">
             {operators.map((op) => (
-              <div key={op.id} className="flex items-start gap-4 rounded-lg border p-4">
+              <div key={op.id} className="flex items-start gap-4 rounded-2xl border p-4">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-sm">{op.name}</span>

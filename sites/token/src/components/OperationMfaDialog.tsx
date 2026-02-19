@@ -84,13 +84,13 @@ export function OperationMfaDialog({ open, onClose, onVerified }: OperationMfaDi
               if (v.length === 6) handleVerify(v);
             }}
             autoFocus
-            containerClassName="gap-2"
+            containerClassName="justify-center"
           >
-            {Array.from({ length: 6 }, (_, i) => (
-              <InputOTPGroup key={i}>
-                <InputOTPSlot index={i} className="rounded-md border" />
-              </InputOTPGroup>
-            ))}
+            <InputOTPGroup>
+              {Array.from({ length: 6 }, (_, i) => (
+                <InputOTPSlot key={i} index={i} />
+              ))}
+            </InputOTPGroup>
           </InputOTP>
         </div>
 

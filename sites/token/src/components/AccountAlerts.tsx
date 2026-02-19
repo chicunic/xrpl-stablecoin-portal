@@ -23,7 +23,7 @@ export function AccountAlerts({ user, onKycComplete }: { user: User; onKycComple
         <button
           type="button"
           onClick={() => navigate("/settings")}
-          className="flex w-full items-center gap-3 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-left transition-colors hover:bg-amber-100"
+          className="flex w-full items-center gap-3 rounded-4xl border border-amber-200 bg-amber-50 px-4 py-3 text-left transition-colors hover:bg-amber-100"
         >
           <ShieldAlert className="h-5 w-5 shrink-0 text-amber-600" />
           <div className="min-w-0 flex-1">
@@ -38,7 +38,7 @@ export function AccountAlerts({ user, onKycComplete }: { user: User; onKycComple
           <button
             type="button"
             onClick={() => setKycOpen(true)}
-            className="flex w-full items-center gap-3 rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-left transition-colors hover:bg-blue-100"
+            className="flex w-full items-center gap-3 rounded-4xl border border-blue-200 bg-blue-50 px-4 py-3 text-left transition-colors hover:bg-blue-100"
           >
             <UserX className="h-5 w-5 shrink-0 text-blue-600" />
             <div className="min-w-0 flex-1">
