@@ -1,7 +1,28 @@
 import { getSessionToken, setSessionToken } from "./auth";
 import { auth } from "./firebase";
+import type {
+  BankAccount,
+  ExchangeOrder,
+  FiatTransaction,
+  FiatWithdrawalResult,
+  Invoice,
+  InvoiceType,
+  KycInfo,
+  MfaVerifyResult,
+  ParsedInvoiceData,
+  Token,
+  TrustlineInfo,
+  User,
+  VirtualAccount,
+  WhitelistAddress,
+  XrpBalance,
+  XrpTransaction,
+  XrpWithdrawalResult,
+} from "./types";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "";
+const MFA_COOKIE = "mfa_token";
+const MFA_MAX_AGE_SEC = 120; // 2 minutes
 
 function getCookie(name: string): string | null {
   const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
@@ -23,19 +44,15 @@ function deleteCookie(name: string): void {
 }
 
 export function getMfaToken(): string | null {
-  return getCookie("mfa_token");
+  return getCookie(MFA_COOKIE);
 }
 
 export function setMfaToken(token: string | null): void {
   if (token) {
-    setCookie("mfa_token", token, 120); // 2 minutes
+    setCookie(MFA_COOKIE, token, MFA_MAX_AGE_SEC);
   } else {
-    deleteCookie("mfa_token");
+    deleteCookie(MFA_COOKIE);
   }
-}
-
-export function clearMfaToken(): void {
-  deleteCookie("mfa_token");
 }
 
 export async function refreshSession(): Promise<void> {
@@ -79,23 +96,12 @@ export class KycRequiredError extends Error {
   }
 }
 
-import type {
-  BankAccount,
-  ExchangeOrder,
-  FiatTransaction,
-  FiatWithdrawalResult,
-  Invoice,
-  KycInfo,
-  ParsedInvoiceData,
-  Token,
-  TrustlineInfo,
-  User,
-  VirtualAccount,
-  WhitelistAddress,
-  XrpBalance,
-  XrpTransaction,
-  XrpWithdrawalResult,
-} from "./types";
+function throwIfForbidden(status: number, body: { code?: string; error?: string }): void {
+  if (status !== 403) return;
+  if (body.code === "MFA_REQUIRED") throw new OperationMfaRequiredError();
+  if (body.error === "KYC required") throw new KycRequiredError();
+  if (body.error === "MFA required") throw new MfaRequiredError();
+}
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers: Record<string, string> = {
@@ -111,21 +117,12 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     headers["X-MFA-Token"] = currentMfaToken;
   }
   const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
-  // Clear MFA token after use (one-time)
   if (currentMfaToken) {
-    clearMfaToken();
+    setMfaToken(null);
   }
   if (!res.ok) {
     const body = await res.json().catch(() => ({ error: "Unknown error" }));
-    if (res.status === 403 && body.code === "MFA_REQUIRED") {
-      throw new OperationMfaRequiredError();
-    }
-    if (res.status === 403 && body.error === "KYC required") {
-      throw new KycRequiredError();
-    }
-    if (res.status === 403 && body.error === "MFA required") {
-      throw new MfaRequiredError();
-    }
+    throwIfForbidden(res.status, body);
     throw new Error(body.error ?? `HTTP ${res.status}`);
   }
   return res.json();
@@ -268,16 +265,15 @@ export function submitKyc(data: {
   });
 }
 
-export function createInvoice(data: {
-  type: "issued" | "received";
-  tokenId: string;
-  amount: number;
-  recipientAddress: string;
-  recipientName: string;
-  description: string;
-  dueDate?: string;
-}) {
-  return request<Invoice>("/api/v1/invoices", {
+export function sendInvoice(data: Omit<ParsedInvoiceData, "invoiceId">): Promise<Invoice> {
+  return request<Invoice>("/api/v1/invoices/send", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function payInvoice(data: ParsedInvoiceData): Promise<Invoice> {
+  return request<Invoice>("/api/v1/invoices/pay", {
     method: "POST",
     body: JSON.stringify(data),
   });
@@ -291,7 +287,7 @@ export async function parseInvoicePdf(pdf: File): Promise<ParsedInvoiceData> {
   const token = getSessionToken();
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const res = await fetch(`${API_BASE}/api/v1/invoices/parse-pdf`, {
+  const res = await fetch(`${API_BASE}/api/v1/invoices/pay/parse-pdf`, {
     method: "POST",
     headers,
     body: formData,
@@ -305,7 +301,7 @@ export async function parseInvoicePdf(pdf: File): Promise<ParsedInvoiceData> {
   return res.json();
 }
 
-export function listInvoices(type?: "issued" | "received") {
+export function listInvoices(type?: InvoiceType) {
   const query = type ? `?type=${type}` : "";
   return request<Invoice[]>(`/api/v1/invoices${query}`);
 }
@@ -314,22 +310,14 @@ export function getInvoice(invoiceId: string) {
   return request<Invoice>(`/api/v1/invoices/${invoiceId}`);
 }
 
-export function payInvoice(invoiceId: string) {
-  return request<Invoice>(`/api/v1/invoices/${invoiceId}/pay`, {
-    method: "POST",
-  });
-}
-
 export function cancelInvoice(invoiceId: string) {
   return request<Invoice>(`/api/v1/invoices/${invoiceId}/cancel`, {
     method: "POST",
   });
 }
 
-export async function verifyOperationMfa(
-  code: string,
-): Promise<{ status: string; mfaToken: string; expiresIn: number }> {
-  const result = await request<{ status: string; mfaToken: string; expiresIn: number }>("/api/v1/mfa/verify", {
+export async function verifyOperationMfa(code: string): Promise<MfaVerifyResult> {
+  const result = await request<MfaVerifyResult>("/api/v1/mfa/verify", {
     method: "POST",
     body: JSON.stringify({ code }),
   });

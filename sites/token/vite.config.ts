@@ -15,12 +15,9 @@ export default defineConfig({
     proxy: {
       "/api": {
         target: "http://localhost:8080",
-        changeOrigin: true,
-        headers: { Connection: "keep-alive" },
       },
       "/health": {
         target: "http://localhost:8080",
-        changeOrigin: true,
       },
     },
   },

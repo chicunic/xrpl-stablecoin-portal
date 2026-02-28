@@ -1,8 +1,14 @@
 export type TransactionType = "deposit" | "withdrawal" | "exchange_in" | "exchange_out" | "refund" | "invoice_payment";
 
-export type InvoiceStatus = "draft" | "pending" | "paid" | "failed" | "cancelled";
+export interface MfaVerifyResult {
+  status: string;
+  mfaToken: string;
+  expiresIn: number;
+}
 
-export type InvoiceType = "issued" | "received";
+export type InvoiceStatus = "pending" | "paid" | "failed" | "cancelled";
+
+export type InvoiceType = "send" | "pay";
 
 export interface Invoice {
   invoiceId: string;
@@ -20,6 +26,7 @@ export interface Invoice {
   createdAt: string;
   updatedAt: string;
   paidAt?: string;
+  paymentId?: string;
 }
 
 export interface ParsedInvoiceData {
@@ -29,6 +36,7 @@ export interface ParsedInvoiceData {
   recipientName: string;
   description: string;
   dueDate?: string;
+  invoiceId?: string;
 }
 
 export interface BankAccount {
