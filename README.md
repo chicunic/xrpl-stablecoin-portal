@@ -54,12 +54,7 @@ Users are assigned a custodial XRPL wallet on registration. Before receiving any
 
 ### Internationalization
 
-Four languages supported with a custom i18n provider:
-
-- Japanese (default)
-- English
-- Chinese
-- Korean
+Four languages (Japanese (default), English, Chinese, Korean) supported with a custom i18n provider.
 
 ## Bank Portal
 
@@ -87,4 +82,4 @@ A traditional banking interface for account operations:
 
 ## License
 
-[MIT](LICENSE) &copy; 2026 nexbridge
+[MIT](LICENSE)
