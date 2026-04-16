@@ -1,18 +1,18 @@
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { clearAuth, isLoggedIn } from "@/lib/auth";
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { clearAuth, isLoggedIn } from '@/lib/auth';
 
 export function Header({ accountHolder }: { accountHolder?: string }) {
   const navigate = useNavigate();
 
   function handleLogout() {
     clearAuth();
-    navigate("/login");
+    void navigate('/login');
   }
 
   function handleHome() {
-    navigate(isLoggedIn() ? "/" : "/login");
+    void navigate(isLoggedIn() ? '/' : '/login');
   }
 
   return (
@@ -25,11 +25,11 @@ export function Header({ accountHolder }: { accountHolder?: string }) {
         >
           <img src="/logo-full.svg" alt="NexBridge" className="h-7 sm:h-8" />
           <Separator orientation="vertical" className="hidden h-5 sm:block" />
-          <span className="hidden text-muted-foreground text-sm sm:inline">インターネットバンキング</span>
+          <span className="text-muted-foreground hidden text-sm sm:inline">インターネットバンキング</span>
         </button>
         {accountHolder && (
           <div className="flex items-center gap-2 sm:gap-3">
-            <span className="hidden text-muted-foreground text-sm sm:inline">{accountHolder} 様</span>
+            <span className="text-muted-foreground hidden text-sm sm:inline">{accountHolder} 様</span>
             <Button variant="outline" size="sm" onClick={handleLogout}>
               ログアウト
             </Button>

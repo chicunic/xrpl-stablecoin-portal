@@ -1,25 +1,25 @@
-import { Landmark, Printer } from "lucide-react";
-import { type SubmitEvent, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Header } from "@/components/Header";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { createAccount } from "@/lib/api";
-import { BANK_NAME } from "@/lib/constants";
-import type { BankAccount } from "@/lib/types";
+import { Landmark, Printer } from 'lucide-react';
+import { type SubmitEvent, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Header } from '@/components/Header';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { createAccount } from '@/lib/api';
+import { BANK_NAME } from '@/lib/constants';
+import type { BankAccount } from '@/lib/types';
 
 function buildPrintHtml(account: BankAccount, pin: string): string {
-  const dateStr = new Intl.DateTimeFormat("ja-JP", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
+  const dateStr = new Intl.DateTimeFormat('ja-JP', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
   }).format(new Date());
-  const accountTypeLabel = account.accountType === "corporate" ? "法人" : "普通（個人）";
+  const accountTypeLabel = account.accountType === 'corporate' ? '法人' : '普通（個人）';
 
   return `<!DOCTYPE html>
 <html lang="ja">
@@ -65,27 +65,28 @@ function buildPrintHtml(account: BankAccount, pin: string): string {
     印刷後は厳重に保管し、第三者に見せないようご注意ください。<br>
     暗証番号はログイン時および取引時に必要です。
   </div>
-  <div class="footer">${BANK_NAME}　口座開設完了通知書</div>
+  <div class="footer">${BANK_NAME}&emsp;口座開設完了通知書</div>
 </body>
 </html>`;
 }
 
 function openPrintWindow(html: string): void {
-  const w = window.open("", "_blank");
+  const w = window.open('', '_blank');
   if (w) {
-    w.document.write(html);
-    w.document.close();
-    w.addEventListener("load", () => w.print());
+    w.document.documentElement.innerHTML = html;
+    w.addEventListener('load', () => {
+      w.print();
+    });
   }
 }
 
 export function RegisterPage() {
   const navigate = useNavigate();
-  const [accountHolder, setAccountHolder] = useState("");
-  const [pin, setPin] = useState("");
-  const [confirmPin, setConfirmPin] = useState("");
-  const [accountType, setAccountType] = useState<"personal" | "corporate">("personal");
-  const [error, setError] = useState("");
+  const [accountHolder, setAccountHolder] = useState('');
+  const [pin, setPin] = useState('');
+  const [confirmPin, setConfirmPin] = useState('');
+  const [accountType, setAccountType] = useState<'personal' | 'corporate'>('personal');
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [created, setCreated] = useState<BankAccount | null>(null);
 
@@ -96,9 +97,9 @@ export function RegisterPage() {
 
   async function handleSubmit(e: SubmitEvent) {
     e.preventDefault();
-    setError("");
+    setError('');
     if (pin !== confirmPin) {
-      setError("暗証番号が一致しません");
+      setError('暗証番号が一致しません');
       return;
     }
     setLoading(true);
@@ -106,7 +107,7 @@ export function RegisterPage() {
       const account = await createAccount({ accountHolder, pin, accountType });
       setCreated(account);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "口座開設に失敗しました");
+      setError(err instanceof Error ? err.message : '口座開設に失敗しました');
     } finally {
       setLoading(false);
     }
@@ -141,14 +142,14 @@ export function RegisterPage() {
                   <span>{created.accountHolder}</span>
                 </div>
               </div>
-              <p className="text-center text-muted-foreground text-xs">
+              <p className="text-muted-foreground text-center text-xs">
                 上記の情報はログイン時に必要です。お控えください。
               </p>
               <Button variant="outline" className="w-full" onClick={handlePrint}>
                 <Printer className="mr-2 h-4 w-4" />
                 口座情報を印刷・PDF保存
               </Button>
-              <Button className="w-full" onClick={() => navigate("/login")}>
+              <Button className="w-full" onClick={() => navigate('/login')}>
                 ログイン画面へ
               </Button>
             </CardContent>
@@ -156,14 +157,19 @@ export function RegisterPage() {
         ) : (
           <Card className="w-full max-w-sm">
             <CardHeader className="text-center">
-              <Landmark className="mx-auto mb-2 h-8 w-8 text-primary" />
+              <Landmark className="text-primary mx-auto mb-2 h-8 w-8" />
               <CardTitle className="text-xl">新規口座開設</CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label>口座種別</Label>
-                  <Tabs value={accountType} onValueChange={(v) => setAccountType(v as "personal" | "corporate")}>
+                  <Tabs
+                    value={accountType}
+                    onValueChange={(v) => {
+                      setAccountType(v as 'personal' | 'corporate');
+                    }}
+                  >
                     <TabsList className="w-full">
                       <TabsTrigger value="personal" className="flex-1">
                         個人
@@ -179,7 +185,9 @@ export function RegisterPage() {
                   <Input
                     id="accountHolder"
                     value={accountHolder}
-                    onChange={(e) => setAccountHolder(e.target.value)}
+                    onChange={(e) => {
+                      setAccountHolder(e.target.value);
+                    }}
                     placeholder="口座名義人を入力"
                     required
                   />
@@ -192,7 +200,9 @@ export function RegisterPage() {
                     inputMode="numeric"
                     maxLength={4}
                     value={pin}
-                    onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
+                    onChange={(e) => {
+                      setPin(e.target.value.replace(/\D/g, ''));
+                    }}
                     placeholder="暗証番号を入力"
                     required
                   />
@@ -205,7 +215,9 @@ export function RegisterPage() {
                     inputMode="numeric"
                     maxLength={4}
                     value={confirmPin}
-                    onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ""))}
+                    onChange={(e) => {
+                      setConfirmPin(e.target.value.replace(/\D/g, ''));
+                    }}
                     placeholder="暗証番号を再入力"
                     required
                   />
@@ -216,12 +228,12 @@ export function RegisterPage() {
                   className="w-full"
                   disabled={loading || !accountHolder || pin.length !== 4 || confirmPin.length !== 4}
                 >
-                  {loading ? "開設中..." : "口座を開設する"}
+                  {loading ? '開設中...' : '口座を開設する'}
                 </Button>
               </form>
-              <p className="mt-4 text-center text-muted-foreground text-sm">
+              <p className="text-muted-foreground mt-4 text-center text-sm">
                 既に口座をお持ちの方は
-                <Link to="/login" className="ml-1 text-primary underline">
+                <Link to="/login" className="text-primary ml-1 underline">
                   ログイン
                 </Link>
               </p>

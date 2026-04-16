@@ -70,13 +70,13 @@ A traditional banking interface for account operations:
 
 | Category | Technology |
 | - | - |
-| Framework | React 19, TypeScript 5.9 |
-| Build | Vite 7, pnpm workspaces |
+| Framework | React 19, TypeScript 6 |
+| Build | Vite 8, pnpm workspaces |
 | Styling | Tailwind CSS 4, Radix UI, shadcn/ui |
 | Auth | Firebase Authentication (OAuth + TOTP MFA) |
 | Blockchain | XRP Ledger (Testnet / Devnet / Mainnet) |
 | Routing | React Router v7 |
-| Linting | Biome |
+| Linting | ESLint 10, Prettier 3 |
 | Deployment | Firebase Hosting, Google Cloud Build |
 | Utilities | qrcode.react, input-otp, ripple-address-codec, lucide-react |
 

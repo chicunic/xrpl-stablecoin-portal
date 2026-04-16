@@ -9,10 +9,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@xrpl-stablecoin-portal/shared": "workspace:*",
-    "input-otp": "^1.4.2",
-    "qrcode.react": "^4.2.0",
-    "radix-ui": "^1.4.3",
-    "ripple-address-codec": "^5.0.0"
+    "@xrpl-stablecoin-portal/shared": "workspace:*"
   }
 }

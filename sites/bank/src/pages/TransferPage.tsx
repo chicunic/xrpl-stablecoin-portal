@@ -1,15 +1,15 @@
-import { type SubmitEvent, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { lookupAccount, transfer } from "@/lib/api";
-import { BRANCH_MAP, BRANCHES } from "@/lib/constants";
-import { formatCurrency } from "@/lib/format";
-import { useAuthContext } from "@/lib/useAuthContext";
+import { type SubmitEvent, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { lookupAccount, transfer } from '@/lib/api';
+import { BRANCH_MAP, BRANCHES } from '@/lib/constants';
+import { formatCurrency } from '@/lib/format';
+import { useAuthContext } from '@/lib/useAuthContext';
 
-type Step = "form" | "confirm" | "done";
+type Step = 'form' | 'confirm' | 'done';
 
 interface LookupResult {
   accountHolder: string;
@@ -21,12 +21,12 @@ interface LookupResult {
 export function TransferPage() {
   const navigate = useNavigate();
   const { account, refreshAccount } = useAuthContext();
-  const [step, setStep] = useState<Step>("form");
-  const [toBranchCode, setToBranchCode] = useState("");
-  const [toAccountNumber, setToAccountNumber] = useState("");
-  const [amount, setAmount] = useState("");
-  const [pin, setPin] = useState("");
-  const [error, setError] = useState("");
+  const [step, setStep] = useState<Step>('form');
+  const [toBranchCode, setToBranchCode] = useState('');
+  const [toAccountNumber, setToAccountNumber] = useState('');
+  const [amount, setAmount] = useState('');
+  const [pin, setPin] = useState('');
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [lookup, setLookup] = useState<LookupResult | null>(null);
   const [result, setResult] = useState<{
@@ -36,41 +36,41 @@ export function TransferPage() {
 
   async function handleConfirm(e: SubmitEvent) {
     e.preventDefault();
-    setError("");
+    setError('');
     setLoading(true);
     try {
       const info = await lookupAccount(toBranchCode, toAccountNumber);
       setLookup(info);
-      setStep("confirm");
+      setStep('confirm');
     } catch (err) {
-      setError(err instanceof Error ? err.message : "振込先の確認に失敗しました");
+      setError(err instanceof Error ? err.message : '振込先の確認に失敗しました');
     } finally {
       setLoading(false);
     }
   }
 
   async function handleTransfer() {
-    setError("");
+    setError('');
     setLoading(true);
     try {
       const res = await transfer(toBranchCode, toAccountNumber, Number(amount), pin);
       setResult(res);
-      setStep("done");
+      setStep('done');
       refreshAccount();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "振込に失敗しました");
+      setError(err instanceof Error ? err.message : '振込に失敗しました');
     } finally {
       setLoading(false);
     }
   }
 
   function reset() {
-    setStep("form");
-    setToBranchCode("");
-    setToAccountNumber("");
-    setAmount("");
-    setPin("");
-    setError("");
+    setStep('form');
+    setToBranchCode('');
+    setToAccountNumber('');
+    setAmount('');
+    setPin('');
+    setError('');
     setLookup(null);
     setResult(null);
   }
@@ -82,10 +82,10 @@ export function TransferPage() {
           <CardTitle className="text-base">振込（お振込み）</CardTitle>
         </CardHeader>
         <CardContent>
-          {step === "done" && result ? (
+          {step === 'done' && result ? (
             <div className="space-y-4 text-center">
               <p className="text-muted-foreground text-sm">振込が完了しました</p>
-              <p className="font-semibold text-2xl">{formatCurrency(Number(amount))}</p>
+              <p className="text-2xl font-semibold">{formatCurrency(Number(amount))}</p>
               <div className="space-y-1 rounded-md border p-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">振込先</span>
@@ -111,14 +111,14 @@ export function TransferPage() {
                 <Button variant="outline" className="flex-1" onClick={reset}>
                   続けて振込
                 </Button>
-                <Button className="flex-1" onClick={() => navigate("/")}>
+                <Button className="flex-1" onClick={() => navigate('/')}>
                   ホームへ戻る
                 </Button>
               </div>
             </div>
-          ) : step === "confirm" && lookup ? (
+          ) : step === 'confirm' && lookup ? (
             <div className="space-y-4">
-              <p className="text-center text-muted-foreground text-sm">以下の内容で振込みます。ご確認ください。</p>
+              <p className="text-muted-foreground text-center text-sm">以下の内容で振込みます。ご確認ください。</p>
               <div className="space-y-2 rounded-md border p-4 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">振込先名義</span>
@@ -147,7 +147,9 @@ export function TransferPage() {
                   inputMode="numeric"
                   maxLength={4}
                   value={pin}
-                  onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))}
+                  onChange={(e) => {
+                    setPin(e.target.value.replace(/\D/g, ''));
+                  }}
                   placeholder="暗証番号を入力"
                 />
               </div>
@@ -157,16 +159,16 @@ export function TransferPage() {
                   variant="outline"
                   className="flex-1"
                   onClick={() => {
-                    setStep("form");
-                    setPin("");
-                    setError("");
+                    setStep('form');
+                    setPin('');
+                    setError('');
                   }}
                   disabled={loading}
                 >
                   戻る
                 </Button>
                 <Button className="flex-1" onClick={handleTransfer} disabled={loading || pin.length !== 4}>
-                  {loading ? "処理中..." : "振込を実行"}
+                  {loading ? '処理中...' : '振込を実行'}
                 </Button>
               </div>
             </div>
@@ -177,8 +179,10 @@ export function TransferPage() {
                 <select
                   id="toBranch"
                   value={toBranchCode}
-                  onChange={(e) => setToBranchCode(e.target.value)}
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs"
+                  onChange={(e) => {
+                    setToBranchCode(e.target.value);
+                  }}
+                  className="border-input flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs"
                   required
                 >
                   <option value="" disabled>
@@ -198,7 +202,9 @@ export function TransferPage() {
                   inputMode="numeric"
                   maxLength={7}
                   value={toAccountNumber}
-                  onChange={(e) => setToAccountNumber(e.target.value.replace(/\D/g, ""))}
+                  onChange={(e) => {
+                    setToAccountNumber(e.target.value.replace(/\D/g, ''));
+                  }}
                   placeholder="口座番号を入力（7桁）"
                   required
                 />
@@ -211,7 +217,9 @@ export function TransferPage() {
                   min={1}
                   max={account.balance}
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  onChange={(e) => {
+                    setAmount(e.target.value);
+                  }}
                   placeholder="金額を入力"
                   required
                 />
@@ -232,7 +240,7 @@ export function TransferPage() {
                   Number(amount) > account.balance
                 }
               >
-                {loading ? "確認中..." : "確認する"}
+                {loading ? '確認中...' : '確認する'}
               </Button>
             </form>
           )}

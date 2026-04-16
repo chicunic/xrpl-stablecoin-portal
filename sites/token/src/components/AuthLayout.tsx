@@ -1,11 +1,11 @@
-import { ArrowLeftRight, Download, FileText, Home, List, Settings, Shield, Upload } from "lucide-react";
-import { type ComponentType, useEffect, useState } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { Header } from "@/components/Header";
-import { useI18n } from "@/i18n";
-import { getMe, getTrustlines, listTokens } from "@/lib/api";
-import { useAuth } from "@/lib/auth";
-import type { Token, TrustlineInfo, User, VirtualAccount } from "@/lib/types";
+import { ArrowLeftRight, Download, FileText, Home, List, Settings, Shield, Upload } from 'lucide-react';
+import { type ComponentType, useEffect, useState } from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Header } from '@/components/Header';
+import { useI18n } from '@/i18n';
+import { getMe, getTrustlines, listTokens } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
+import type { Token, TrustlineInfo, User, VirtualAccount } from '@/lib/types';
 
 interface TabDef {
   path: string;
@@ -14,18 +14,18 @@ interface TabDef {
 }
 
 const allTabs: TabDef[] = [
-  { path: "/", labelKey: "nav.home", icon: Home },
-  { path: "/deposit", labelKey: "nav.deposit", icon: Download },
-  { path: "/withdraw", labelKey: "nav.withdraw", icon: Upload },
-  { path: "/exchange", labelKey: "nav.exchange", icon: ArrowLeftRight },
-  { path: "/invoices", labelKey: "nav.invoices", icon: FileText },
-  { path: "/whitelist", labelKey: "nav.whitelist", icon: Shield },
-  { path: "/orders", labelKey: "nav.orders", icon: List },
-  { path: "/settings", labelKey: "nav.settings", icon: Settings },
+  { path: '/', labelKey: 'nav.home', icon: Home },
+  { path: '/deposit', labelKey: 'nav.deposit', icon: Download },
+  { path: '/withdraw', labelKey: 'nav.withdraw', icon: Upload },
+  { path: '/exchange', labelKey: 'nav.exchange', icon: ArrowLeftRight },
+  { path: '/invoices', labelKey: 'nav.invoices', icon: FileText },
+  { path: '/whitelist', labelKey: 'nav.whitelist', icon: Shield },
+  { path: '/orders', labelKey: 'nav.orders', icon: List },
+  { path: '/settings', labelKey: 'nav.settings', icon: Settings },
 ];
 
 function isTabActive(tabPath: string, currentPath: string): boolean {
-  return tabPath === "/" ? currentPath === "/" : currentPath.startsWith(tabPath);
+  return tabPath === '/' ? currentPath === '/' : currentPath.startsWith(tabPath);
 }
 
 export function AuthLayout() {
@@ -35,7 +35,7 @@ export function AuthLayout() {
   const { user: firebaseUser, loading: authLoading, logout } = useAuth();
   const [user, setUser] = useState<User | null>(null);
   const [tokens, setTokens] = useState<Token[]>([]);
-  const [address, setAddress] = useState("");
+  const [address, setAddress] = useState('');
   const [virtualAccount, setVirtualAccount] = useState<VirtualAccount | null>(null);
   const [trustlines, setTrustlines] = useState<TrustlineInfo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,22 +44,24 @@ export function AuthLayout() {
     const [u, tks, tls] = await Promise.all([getMe(), listTokens(), getTrustlines()]);
     setUser(u);
     setTokens(tks);
-    setAddress(u.walletAddress ?? "");
+    setAddress(u.walletAddress ?? '');
     setTrustlines(tls);
   }
 
   useEffect(() => {
     if (authLoading) return;
     if (!firebaseUser) {
-      navigate("/login");
+      void navigate('/login');
       return;
     }
-    loadAll()
+    void loadAll()
       .catch(() => {
-        logout();
-        navigate("/login");
+        void logout();
+        void navigate('/login');
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+      });
   }, [firebaseUser, authLoading, navigate, logout]);
 
   function refreshAll() {
@@ -69,7 +71,7 @@ export function AuthLayout() {
   if (authLoading || loading || !user) {
     return (
       <div className="flex min-h-svh items-center justify-center bg-gray-50">
-        <p className="text-muted-foreground">{t("common.loading")}</p>
+        <p className="text-muted-foreground">{t('common.loading')}</p>
       </div>
     );
   }
@@ -89,8 +91,8 @@ export function AuthLayout() {
                 onClick={() => navigate(tab.path)}
                 className={`inline-flex items-center gap-1.5 rounded-4xl px-3 py-1.5 text-sm transition-colors ${
                   active
-                    ? "bg-primary/10 font-medium text-primary"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    ? 'bg-primary/10 text-primary font-medium'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -117,8 +119,8 @@ export function AuthLayout() {
           }}
         />
       </main>
-      <footer className="hidden border-t bg-white py-4 text-center text-muted-foreground text-xs sm:block">
-        &copy; {new Date().getFullYear()} {t("footer.copyright")}
+      <footer className="text-muted-foreground hidden border-t bg-white py-4 text-center text-xs sm:block">
+        &copy; {new Date().getFullYear()} {t('footer.copyright')}
       </footer>
       <nav className="fixed inset-x-0 bottom-0 z-50 border-t bg-white sm:hidden">
         <div className="flex items-center justify-around pb-[env(safe-area-inset-bottom)]">
@@ -131,7 +133,7 @@ export function AuthLayout() {
                 key={tab.path}
                 onClick={() => navigate(tab.path)}
                 className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] transition-colors ${
-                  active ? "font-medium text-primary" : "text-muted-foreground"
+                  active ? 'text-primary font-medium' : 'text-muted-foreground'
                 }`}
               >
                 <Icon className="h-5 w-5" />

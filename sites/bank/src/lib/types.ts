@@ -1,7 +1,7 @@
 export interface BankAccount {
   accountId: string;
   accountNumber: string;
-  accountType: "personal" | "corporate";
+  accountType: 'personal' | 'corporate';
   accountHolder: string;
   bankCode: string;
   branchCode: string;
@@ -22,7 +22,7 @@ export interface Counterparty {
 export interface BankTransaction {
   transactionId: string;
   accountId: string;
-  type: "atm_in" | "atm_out" | "transfer_in" | "transfer_out";
+  type: 'atm_in' | 'atm_out' | 'transfer_in' | 'transfer_out';
   amount: number;
   balance: number;
   counterparty: Counterparty | null;

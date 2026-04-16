@@ -1,6 +1,6 @@
-import type { BankAccount } from "./types";
+import type { BankAccount } from './types';
 
-const ACCOUNT_KEY = "bank_account";
+const ACCOUNT_KEY = 'bank_account';
 
 function getCookie(name: string): string | null {
   const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
@@ -8,17 +8,17 @@ function getCookie(name: string): string | null {
 }
 
 function setCookie(name: string, value: string, maxAgeSec: number): void {
-  cookieStore.set({
+  void cookieStore.set({
     name,
     value: encodeURIComponent(value),
-    path: "/",
+    path: '/',
     expires: Date.now() + maxAgeSec * 1000,
-    sameSite: "lax",
+    sameSite: 'lax',
   });
 }
 
 function deleteCookie(name: string): void {
-  cookieStore.delete({ name, path: "/" });
+  void cookieStore.delete({ name, path: '/' });
 }
 
 const TOKEN_MAX_AGE = 24 * 60 * 60; // 1 day
@@ -31,23 +31,23 @@ export function getSavedAccount(): BankAccount | null {
   const raw = localStorage.getItem(ACCOUNT_KEY);
   if (!raw) return null;
   try {
-    return JSON.parse(raw);
+    return JSON.parse(raw) as BankAccount;
   } catch {
     return null;
   }
 }
 
 export function saveToken(token: string) {
-  setCookie("token", token, TOKEN_MAX_AGE);
+  setCookie('token', token, TOKEN_MAX_AGE);
 }
 
 export function getAuthToken(): string | null {
-  return getCookie("token");
+  return getCookie('token');
 }
 
 export function clearAuth() {
   localStorage.removeItem(ACCOUNT_KEY);
-  deleteCookie("token");
+  deleteCookie('token');
 }
 
 export function isLoggedIn(): boolean {

@@ -1,13 +1,13 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { AuthLayout } from "@/components/AuthLayout";
-import { AtmPage } from "@/pages/AtmPage";
-import { DashboardPage } from "@/pages/DashboardPage";
-import { LoginPage } from "@/pages/LoginPage";
-import { RegisterPage } from "@/pages/RegisterPage";
-import { SettingsPage } from "@/pages/SettingsPage";
-import { TransactionsPage } from "@/pages/TransactionsPage";
-import { TransferPage } from "@/pages/TransferPage";
-import { VirtualAccountsPage } from "@/pages/VirtualAccountsPage";
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { AuthLayout } from '@/components/AuthLayout';
+import { AtmPage } from '@/pages/AtmPage';
+import { DashboardPage } from '@/pages/DashboardPage';
+import { LoginPage } from '@/pages/LoginPage';
+import { RegisterPage } from '@/pages/RegisterPage';
+import { SettingsPage } from '@/pages/SettingsPage';
+import { TransactionsPage } from '@/pages/TransactionsPage';
+import { TransferPage } from '@/pages/TransferPage';
+import { VirtualAccountsPage } from '@/pages/VirtualAccountsPage';
 
 function App() {
   return (

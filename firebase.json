@@ -7,17 +7,13 @@
       "site": "xrpl-bank",
       "public": "sites/bank/dist",
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-      "rewrites": [
-        { "source": "**", "destination": "/index.html" }
-      ]
+      "rewrites": [{ "source": "**", "destination": "/index.html" }]
     },
     {
       "site": "xrpl-token",
       "public": "sites/token/dist",
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-      "rewrites": [
-        { "source": "**", "destination": "/index.html" }
-      ]
+      "rewrites": [{ "source": "**", "destination": "/index.html" }]
     }
   ]
 }

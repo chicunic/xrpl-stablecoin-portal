@@ -1,10 +1,10 @@
-import { type FormEvent, useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useI18n } from "@/i18n";
-import { refreshSession, submitKyc } from "@/lib/api";
+import { type SubmitEvent, useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useI18n } from '@/i18n';
+import { refreshSession, submitKyc } from '@/lib/api';
 
 interface KycDialogProps {
   open: boolean;
@@ -12,12 +12,9 @@ interface KycDialogProps {
   onSuccess: () => void;
 }
 
-/** Detects invalid full-width characters in the address field. */
+/** Detects full-width ASCII variants (U+FF01-FF5E) in the address field. */
 function hasInvalidFullWidth(value: string): boolean {
-  // Allow: kanji, hiragana, katakana (including long vowel mark ー), full-width middle dot ・
-  // Disallow: full-width digits (０-９), full-width Latin (Ａ-Ｚ, ａ-ｚ), full-width symbols (！-／ etc.)
-  // eslint-disable-next-line no-irregular-whitespace
-  return /[Ａ-Ｚａ-ｚ０-９！＂＃＄％＆＇（）＊＋，－．／：；＜＝＞？＠［＼］＾＿｀｛｜｝～]/.test(value);
+  return /[\uFF01-\uFF5E]/.test(value);
 }
 
 function hasConsecutiveSpaces(value: string): boolean {
@@ -27,27 +24,27 @@ function hasConsecutiveSpaces(value: string): boolean {
 export function KycDialog({ open, onOpenChange, onSuccess }: KycDialogProps) {
   const { t } = useI18n();
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
-  const [fullName, setFullName] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [postalCode, setPostalCode] = useState("");
-  const [prefecture, setPrefecture] = useState("");
-  const [city, setCity] = useState("");
-  const [town, setTown] = useState("");
-  const [address, setAddress] = useState("");
+  const [fullName, setFullName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [postalCode, setPostalCode] = useState('');
+  const [prefecture, setPrefecture] = useState('');
+  const [city, setCity] = useState('');
+  const [town, setTown] = useState('');
+  const [address, setAddress] = useState('');
 
   // Reset form when dialog opens
   useEffect(() => {
     if (open) {
-      setFullName("");
-      setPhoneNumber("");
-      setPostalCode("");
-      setPrefecture("");
-      setCity("");
-      setTown("");
-      setAddress("");
-      setError("");
+      setFullName('');
+      setPhoneNumber('');
+      setPostalCode('');
+      setPrefecture('');
+      setCity('');
+      setTown('');
+      setAddress('');
+      setError('');
     }
   }, [open]);
 
@@ -55,20 +52,20 @@ export function KycDialog({ open, onOpenChange, onSuccess }: KycDialogProps) {
 
   // Postal code auto-lookup
   useEffect(() => {
-    setPrefecture("");
-    setCity("");
-    setTown("");
+    setPrefecture('');
+    setCity('');
+    setTown('');
     setPostalInvalid(false);
     if (postalCode.length !== 7) return;
     if (!/^\d{7}$/.test(postalCode)) return;
     fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${postalCode}`)
       .then((res) => res.json())
-      .then((data) => {
+      .then((data: { results?: { address1: string; address2: string; address3: string }[] }) => {
         if (data.results?.[0]) {
           const r = data.results[0];
           setPrefecture(r.address1);
           setCity(r.address2);
-          setTown(r.address3 || "");
+          setTown(r.address3 || '');
         } else {
           setPostalInvalid(true);
         }
@@ -80,10 +77,10 @@ export function KycDialog({ open, onOpenChange, onSuccess }: KycDialogProps) {
   const addressInvalid = address.length > 0 && (hasInvalidFullWidth(address) || hasConsecutiveSpaces(address));
   const formIncomplete = !fullName || !phoneNumber || !postalCode || !prefecture || !city || !address;
 
-  async function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: SubmitEvent) {
     e.preventDefault();
     if (addressInvalid) return;
-    setError("");
+    setError('');
     setSubmitting(true);
     try {
       await submitKyc({
@@ -99,7 +96,7 @@ export function KycDialog({ open, onOpenChange, onSuccess }: KycDialogProps) {
       onSuccess();
       onOpenChange(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("kyc.error"));
+      setError(err instanceof Error ? err.message : t('kyc.error'));
     } finally {
       setSubmitting(false);
     }
@@ -114,12 +111,19 @@ export function KycDialog({ open, onOpenChange, onSuccess }: KycDialogProps) {
     >
       <DialogContent className="sm:max-w-md" showCloseButton={!submitting}>
         <DialogHeader>
-          <DialogTitle>{t("kyc.title")}</DialogTitle>
+          <DialogTitle>{t('kyc.title')}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="space-y-1">
             <Label htmlFor="kyc-fullName">氏名</Label>
-            <Input id="kyc-fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+            <Input
+              id="kyc-fullName"
+              value={fullName}
+              onChange={(e) => {
+                setFullName(e.target.value);
+              }}
+              required
+            />
           </div>
 
           <div className="space-y-1">
@@ -130,9 +134,11 @@ export function KycDialog({ open, onOpenChange, onSuccess }: KycDialogProps) {
               inputMode="numeric"
               placeholder="09012345678"
               value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
+              onChange={(e) => {
+                setPhoneNumber(e.target.value.replace(/\D/g, ''));
+              }}
               pattern="0\d{9,10}"
-              className={phoneInvalid ? "border-destructive" : ""}
+              className={phoneInvalid ? 'border-destructive' : ''}
               required
             />
             {phoneInvalid && <p className="text-destructive text-xs">0から始まる10〜11桁の番号を入力してください</p>}
@@ -145,10 +151,12 @@ export function KycDialog({ open, onOpenChange, onSuccess }: KycDialogProps) {
               inputMode="numeric"
               placeholder="1234567"
               value={postalCode}
-              onChange={(e) => setPostalCode(e.target.value.replace(/\D/g, "").slice(0, 7))}
+              onChange={(e) => {
+                setPostalCode(e.target.value.replace(/\D/g, '').slice(0, 7));
+              }}
               pattern="\d{7}"
               maxLength={7}
-              className={postalInvalid ? "border-destructive" : ""}
+              className={postalInvalid ? 'border-destructive' : ''}
               required
             />
             {postalInvalid && <p className="text-destructive text-xs">有効な郵便番号を入力してください</p>}
@@ -175,8 +183,10 @@ export function KycDialog({ open, onOpenChange, onSuccess }: KycDialogProps) {
               id="kyc-address"
               placeholder="1-2-3 ○○マンション101"
               value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              className={addressInvalid ? "border-destructive" : ""}
+              onChange={(e) => {
+                setAddress(e.target.value);
+              }}
+              className={addressInvalid ? 'border-destructive' : ''}
               required
             />
             {addressInvalid && <p className="text-destructive text-xs">数字・英字・記号は半角で入力してください</p>}
@@ -189,7 +199,7 @@ export function KycDialog({ open, onOpenChange, onSuccess }: KycDialogProps) {
             disabled={submitting || phoneInvalid || postalInvalid || addressInvalid || formIncomplete}
             className="w-full"
           >
-            {submitting ? t("kyc.submitting") : t("kyc.submit")}
+            {submitting ? t('kyc.submitting') : t('kyc.submit')}
           </Button>
         </form>
       </DialogContent>

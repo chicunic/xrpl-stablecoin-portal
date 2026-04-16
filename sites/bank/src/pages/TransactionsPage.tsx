@@ -1,18 +1,18 @@
-import { ArrowDownLeft, ArrowUpRight, Receipt } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getTransactions } from "@/lib/api";
-import { formatCurrency, formatDate, isIncome, txTypeLabel } from "@/lib/format";
-import type { BankTransaction } from "@/lib/types";
+import { ArrowDownLeft, ArrowUpRight, Receipt } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { getTransactions } from '@/lib/api';
+import { formatCurrency, formatDate, isIncome, txTypeLabel } from '@/lib/format';
+import type { BankTransaction } from '@/lib/types';
 
-function TransactionIcon({ type }: { type: BankTransaction["type"] }) {
+function TransactionIcon({ type }: { type: BankTransaction['type'] }) {
   const income = isIncome(type);
   return (
     <div
       className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-        income ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+        income ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
       }`}
     >
       {income ? <ArrowDownLeft className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
@@ -20,11 +20,11 @@ function TransactionIcon({ type }: { type: BankTransaction["type"] }) {
   );
 }
 
-function TransactionAmount({ type, amount }: { type: BankTransaction["type"]; amount: number }) {
+function TransactionAmount({ type, amount }: { type: BankTransaction['type']; amount: number }) {
   const income = isIncome(type);
   return (
-    <span className={`font-medium font-mono text-sm ${income ? "text-green-700" : "text-red-700"}`}>
-      {income ? "+" : "-"}
+    <span className={`font-mono text-sm font-medium ${income ? 'text-green-700' : 'text-red-700'}`}>
+      {income ? '+' : '-'}
       {formatCurrency(amount)}
     </span>
   );
@@ -38,7 +38,9 @@ export function TransactionsPage() {
     getTransactions()
       .then(setTransactions)
       .catch(() => {})
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   if (loading) {
@@ -53,11 +55,13 @@ export function TransactionsPage() {
     <div className="mx-auto max-w-4xl px-4 py-6">
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">お取引明細　全{transactions.length}件</CardTitle>
+          <CardTitle className="text-base">
+            お取引明細{'\u3000'}全{transactions.length}件
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {transactions.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 px-6 py-12 text-muted-foreground">
+            <div className="text-muted-foreground flex flex-col items-center gap-2 px-6 py-12">
               <Receipt className="h-10 w-10" />
               <p className="text-sm">お取引はありません</p>
             </div>
@@ -75,7 +79,7 @@ export function TransactionsPage() {
                         </Badge>
                         <span className="truncate text-sm">{tx.description}</span>
                       </div>
-                      <div className="mt-0.5 flex items-center gap-2 text-muted-foreground text-xs">
+                      <div className="text-muted-foreground mt-0.5 flex items-center gap-2 text-xs">
                         <span>{formatDate(tx.createdAt)}</span>
                         {tx.virtualAccountLabel && <span>[{tx.virtualAccountLabel}]</span>}
                       </div>
@@ -84,7 +88,7 @@ export function TransactionsPage() {
                       <span className="block">
                         <TransactionAmount type={tx.type} amount={tx.amount} />
                       </span>
-                      <span className="block font-mono text-muted-foreground text-xs">
+                      <span className="text-muted-foreground block font-mono text-xs">
                         {formatCurrency(tx.balance)}
                       </span>
                     </div>
@@ -110,7 +114,7 @@ export function TransactionsPage() {
                         <TableCell>
                           <TransactionIcon type={tx.type} />
                         </TableCell>
-                        <TableCell className="whitespace-nowrap text-muted-foreground text-xs">
+                        <TableCell className="text-muted-foreground text-xs whitespace-nowrap">
                           {formatDate(tx.createdAt)}
                         </TableCell>
                         <TableCell>
@@ -121,7 +125,7 @@ export function TransactionsPage() {
                         <TableCell className="text-sm">
                           {tx.description}
                           {tx.virtualAccountLabel && (
-                            <span className="ml-1 text-muted-foreground text-xs">[{tx.virtualAccountLabel}]</span>
+                            <span className="text-muted-foreground ml-1 text-xs">[{tx.virtualAccountLabel}]</span>
                           )}
                         </TableCell>
                         <TableCell className="text-right">
