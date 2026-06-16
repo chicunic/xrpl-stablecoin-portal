@@ -1,19 +1,20 @@
-import { Coins, Link, ShieldCheck, ShieldX, Wallet } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { TrustLineDialog } from '@/components/TrustLineDialog';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useI18n } from '@/i18n';
-import { getFiatBalance, getXrpBalance } from '@/lib/api';
-import { formatCurrency, formatTokenAmount } from '@/lib/format';
-import { useAuthContext } from '@/lib/useAuthContext';
+import { noop } from "@xrpl-stablecoin-portal/shared";
+import { Coins, Link, ShieldCheck, ShieldX, Wallet } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { TrustLineDialog } from "@/components/TrustLineDialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useI18n } from "@/i18n";
+import { getFiatBalance, getXrpBalance } from "@/lib/api";
+import { formatCurrency, formatTokenAmount } from "@/lib/format";
+import { useAuthContext } from "@/lib/useAuthContext";
 
 export function DashboardPage() {
   const { address, trustlines, refreshTrustlines } = useAuthContext();
   const { t } = useI18n();
   const [fiatBalance, setFiatBalance] = useState<number>(0);
   const [balanceMap, setBalanceMap] = useState<Map<string, number>>(new Map());
-  const [trustDialogTokenId, setTrustDialogTokenId] = useState('');
+  const [trustDialogTokenId, setTrustDialogTokenId] = useState("");
 
   const tokenDisplays = useMemo(
     () =>
@@ -39,7 +40,7 @@ export function DashboardPage() {
       .then((r) => {
         setFiatBalance(r.balance);
       })
-      .catch(() => {});
+      .catch(noop);
     void refreshBalances();
   }, [address, refreshBalances]);
 
@@ -50,7 +51,7 @@ export function DashboardPage() {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <Wallet className="text-primary h-4 w-4" />
-              {t('dashboard.totalBalance')}
+              {t("dashboard.totalBalance")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -61,7 +62,7 @@ export function DashboardPage() {
         </Card>
         <Card className="bg-gradient-to-br from-emerald-50/80 to-emerald-100/40 ring-emerald-200/50">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm text-emerald-700">{t('dashboard.fiatBalance')}</CardTitle>
+            <CardTitle className="text-sm text-emerald-700">{t("dashboard.fiatBalance")}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-center text-2xl font-semibold tabular-nums">{formatCurrency(fiatBalance)}</p>
@@ -69,7 +70,7 @@ export function DashboardPage() {
         </Card>
         <Card className="bg-gradient-to-br from-blue-50/80 to-blue-100/40 ring-blue-200/50">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm text-blue-700">{t('dashboard.tokenBalance')}</CardTitle>
+            <CardTitle className="text-sm text-blue-700">{t("dashboard.tokenBalance")}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-center text-2xl font-semibold tabular-nums">
@@ -83,12 +84,12 @@ export function DashboardPage() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <Coins className="text-primary h-4 w-4" />
-            {t('dashboard.tokenList')}
+            {t("dashboard.tokenList")}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {tokenDisplays.length === 0 ? (
-            <p className="text-muted-foreground py-4 text-center text-sm">{t('dashboard.noTokens')}</p>
+            <p className="text-muted-foreground py-4 text-center text-sm">{t("dashboard.noTokens")}</p>
           ) : (
             <div className="space-y-3">
               {tokenDisplays.map((b) => (
@@ -105,12 +106,12 @@ export function DashboardPage() {
                       {b.hasTrustline ? (
                         <>
                           <ShieldCheck className="h-3.5 w-3.5 text-green-600" />
-                          <span className="text-xs text-green-600">{t('dashboard.trustLineDone')}</span>
+                          <span className="text-xs text-green-600">{t("dashboard.trustLineDone")}</span>
                         </>
                       ) : (
                         <>
                           <ShieldX className="text-muted-foreground h-3.5 w-3.5" />
-                          <span className="text-muted-foreground text-xs">{t('dashboard.trustLineNotSet')}</span>
+                          <span className="text-muted-foreground text-xs">{t("dashboard.trustLineNotSet")}</span>
                         </>
                       )}
                     </div>
@@ -128,7 +129,7 @@ export function DashboardPage() {
                         }}
                       >
                         <Link className="mr-1.5 h-3.5 w-3.5" />
-                        {t('deposit.trustLineSet')}
+                        {t("deposit.trustLineSet")}
                       </Button>
                     )}
                   </div>
@@ -143,7 +144,7 @@ export function DashboardPage() {
         tokenId={trustDialogTokenId}
         open={!!trustDialogTokenId}
         onOpenChange={(open) => {
-          if (!open) setTrustDialogTokenId('');
+          if (!open) setTrustDialogTokenId("");
         }}
         onSuccess={() => {
           refreshTrustlines();

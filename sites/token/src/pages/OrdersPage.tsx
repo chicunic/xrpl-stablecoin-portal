@@ -1,19 +1,20 @@
-import { ExternalLink } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useI18n } from '@/i18n';
-import { getFiatTransactions, getXrpTransactions } from '@/lib/api';
-import { formatCurrency, formatDate, formatTokenAmount, isIncomeType, txTypeLabel } from '@/lib/format';
-import type { FiatTransaction, TransactionType, XrpTransaction } from '@/lib/types';
-import { useAuthContext } from '@/lib/useAuthContext';
-import { explorerTxUrl } from '@/lib/xrpl';
+import { noop } from "@xrpl-stablecoin-portal/shared";
+import { ExternalLink } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useI18n } from "@/i18n";
+import { getFiatTransactions, getXrpTransactions } from "@/lib/api";
+import { formatCurrency, formatDate, formatTokenAmount, isIncomeType, txTypeLabel } from "@/lib/format";
+import type { FiatTransaction, TransactionType, XrpTransaction } from "@/lib/types";
+import { useAuthContext } from "@/lib/useAuthContext";
+import { explorerTxUrl } from "@/lib/xrpl";
 
 function txBadgeClass(type: TransactionType): string {
-  if (isIncomeType(type)) return 'bg-green-100 text-green-700';
-  return 'bg-amber-100 text-amber-700';
+  if (isIncomeType(type)) return "bg-green-100 text-green-700";
+  return "bg-amber-100 text-amber-700";
 }
 
 function XrpTransactionsTab() {
@@ -27,22 +28,22 @@ function XrpTransactionsTab() {
   useEffect(() => {
     getXrpTransactions()
       .then(setTransactions)
-      .catch(() => {})
+      .catch(noop)
       .finally(() => {
         setLoading(false);
       });
   }, []);
 
-  if (loading) return <p className="text-muted-foreground py-6 text-center">{t('common.loading')}</p>;
+  if (loading) return <p className="text-muted-foreground py-6 text-center">{t("common.loading")}</p>;
 
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-base">{t('orders.xrpTitle', transactions.length)}</CardTitle>
+        <CardTitle className="text-base">{t("orders.xrpTitle", transactions.length)}</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         {transactions.length === 0 ? (
-          <p className="text-muted-foreground px-6 py-8 text-center text-sm">{t('orders.noTransactions')}</p>
+          <p className="text-muted-foreground px-6 py-8 text-center text-sm">{t("orders.noTransactions")}</p>
         ) : (
           <>
             <div className="divide-y sm:hidden">
@@ -72,11 +73,11 @@ function XrpTransactionsTab() {
                   <div className="shrink-0 text-right">
                     <span
                       className={`block font-mono text-sm font-medium ${
-                        isIncomeType(tx.type) ? 'text-green-700' : 'text-red-700'
+                        isIncomeType(tx.type) ? "text-green-700" : "text-red-700"
                       }`}
                     >
-                      {isIncomeType(tx.type) ? '+' : '-'}
-                      {formatTokenAmount(tx.amount)} {currencyMap.get(tx.tokenId) ?? ''}
+                      {isIncomeType(tx.type) ? "+" : "-"}
+                      {formatTokenAmount(tx.amount)} {currencyMap.get(tx.tokenId) ?? ""}
                     </span>
                   </div>
                 </div>
@@ -86,10 +87,10 @@ function XrpTransactionsTab() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{t('orders.dateTime')}</TableHead>
-                    <TableHead>{t('orders.type')}</TableHead>
-                    <TableHead>{t('orders.description')}</TableHead>
-                    <TableHead className="text-right">{t('orders.amount')}</TableHead>
+                    <TableHead>{t("orders.dateTime")}</TableHead>
+                    <TableHead>{t("orders.type")}</TableHead>
+                    <TableHead>{t("orders.description")}</TableHead>
+                    <TableHead className="text-right">{t("orders.amount")}</TableHead>
                     <TableHead className="w-14">
                       <ExternalLink className="text-muted-foreground mx-auto h-3.5 w-3.5" />
                     </TableHead>
@@ -108,11 +109,11 @@ function XrpTransactionsTab() {
                       <TableCell className="text-right">
                         <span
                           className={`font-mono text-sm font-medium ${
-                            isIncomeType(tx.type) ? 'text-green-700' : 'text-red-700'
+                            isIncomeType(tx.type) ? "text-green-700" : "text-red-700"
                           }`}
                         >
-                          {isIncomeType(tx.type) ? '+' : '-'}
-                          {formatTokenAmount(tx.amount)} {currencyMap.get(tx.tokenId) ?? ''}
+                          {isIncomeType(tx.type) ? "+" : "-"}
+                          {formatTokenAmount(tx.amount)} {currencyMap.get(tx.tokenId) ?? ""}
                         </span>
                       </TableCell>
                       <TableCell>
@@ -147,22 +148,22 @@ function FiatTransactionsTab() {
   useEffect(() => {
     getFiatTransactions()
       .then(setTransactions)
-      .catch(() => {})
+      .catch(noop)
       .finally(() => {
         setLoading(false);
       });
   }, []);
 
-  if (loading) return <p className="text-muted-foreground py-6 text-center">{t('common.loading')}</p>;
+  if (loading) return <p className="text-muted-foreground py-6 text-center">{t("common.loading")}</p>;
 
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-base">{t('orders.fiatTitle', transactions.length)}</CardTitle>
+        <CardTitle className="text-base">{t("orders.fiatTitle", transactions.length)}</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         {transactions.length === 0 ? (
-          <p className="text-muted-foreground px-6 py-8 text-center text-sm">{t('orders.noTransactions')}</p>
+          <p className="text-muted-foreground px-6 py-8 text-center text-sm">{t("orders.noTransactions")}</p>
         ) : (
           <>
             <div className="divide-y sm:hidden">
@@ -180,10 +181,10 @@ function FiatTransactionsTab() {
                   <div className="shrink-0 text-right">
                     <span
                       className={`block font-mono text-sm font-medium ${
-                        isIncomeType(tx.type) ? 'text-green-700' : 'text-red-700'
+                        isIncomeType(tx.type) ? "text-green-700" : "text-red-700"
                       }`}
                     >
-                      {isIncomeType(tx.type) ? '+' : '-'}
+                      {isIncomeType(tx.type) ? "+" : "-"}
                       {formatCurrency(tx.amount)}
                     </span>
                     <span className="text-muted-foreground block font-mono text-xs">{formatCurrency(tx.balance)}</span>
@@ -195,11 +196,11 @@ function FiatTransactionsTab() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>{t('orders.dateTime')}</TableHead>
-                    <TableHead>{t('orders.type')}</TableHead>
-                    <TableHead>{t('orders.description')}</TableHead>
-                    <TableHead className="text-right">{t('orders.amount')}</TableHead>
-                    <TableHead className="text-right">{t('orders.balance')}</TableHead>
+                    <TableHead>{t("orders.dateTime")}</TableHead>
+                    <TableHead>{t("orders.type")}</TableHead>
+                    <TableHead>{t("orders.description")}</TableHead>
+                    <TableHead className="text-right">{t("orders.amount")}</TableHead>
+                    <TableHead className="text-right">{t("orders.balance")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -215,10 +216,10 @@ function FiatTransactionsTab() {
                       <TableCell className="text-right">
                         <span
                           className={`font-mono text-sm font-medium ${
-                            isIncomeType(tx.type) ? 'text-green-700' : 'text-red-700'
+                            isIncomeType(tx.type) ? "text-green-700" : "text-red-700"
                           }`}
                         >
-                          {isIncomeType(tx.type) ? '+' : '-'}
+                          {isIncomeType(tx.type) ? "+" : "-"}
                           {formatCurrency(tx.amount)}
                         </span>
                       </TableCell>
@@ -243,10 +244,10 @@ export function OrdersPage() {
       <Tabs defaultValue="fiat">
         <TabsList className="mb-4 w-full">
           <TabsTrigger value="fiat" className="flex-1">
-            {t('orders.fiatTab')}
+            {t("orders.fiatTab")}
           </TabsTrigger>
           <TabsTrigger value="xrp" className="flex-1">
-            {t('orders.xrpTab')}
+            {t("orders.xrpTab")}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="fiat">

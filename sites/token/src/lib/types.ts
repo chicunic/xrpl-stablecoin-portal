@@ -1,4 +1,4 @@
-export type TransactionType = 'deposit' | 'withdrawal' | 'exchange_in' | 'exchange_out' | 'refund' | 'invoice_payment';
+export type TransactionType = "deposit" | "withdrawal" | "exchange_in" | "exchange_out" | "refund" | "invoice_payment";
 
 export interface MfaVerifyResult {
   status: string;
@@ -6,9 +6,9 @@ export interface MfaVerifyResult {
   expiresIn: number;
 }
 
-export type InvoiceStatus = 'pending' | 'paid' | 'failed' | 'cancelled';
+export type InvoiceStatus = "pending" | "paid" | "failed" | "cancelled";
 
-export type InvoiceType = 'send' | 'pay';
+export type InvoiceType = "send" | "pay";
 
 export interface Invoice {
   invoiceId: string;
@@ -71,7 +71,7 @@ export interface User {
   email: string;
   name: string;
   fiatBalance: number;
-  kycStatus: 'none' | 'approved';
+  kycStatus: "none" | "approved";
   hasWallet: boolean;
   hasVirtualAccount: boolean;
   walletAddress?: string;
@@ -86,7 +86,7 @@ export interface KycInfo {
   city: string;
   town: string;
   address: string;
-  status: 'none' | 'approved';
+  status: "none" | "approved";
   submittedAt: string;
 }
 
@@ -113,9 +113,9 @@ export interface ExchangeOrder {
   orderId: string;
   userId: string;
   tokenId: string;
-  direction: 'fiat_to_token' | 'token_to_fiat';
+  direction: "fiat_to_token" | "token_to_fiat";
   amount: number;
-  status: 'pending' | 'fiat_debited' | 'token_burned' | 'completed' | 'failed';
+  status: "pending" | "fiat_debited" | "token_burned" | "completed" | "failed";
   xrplTxHash: string;
   failureReason: string;
   createdAt: string;

@@ -1,27 +1,28 @@
-import { Globe, Landmark, Trash2 } from 'lucide-react';
-import { type SubmitEvent, useCallback, useEffect, useRef, useState } from 'react';
-import { OperationMfaDialog } from '@/components/OperationMfaDialog';
-import { PrerequisiteAlerts, usePrerequisites } from '@/components/PrerequisiteGuard';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useI18n } from '@/i18n';
+import { noop } from "@xrpl-stablecoin-portal/shared";
+import { Globe, Landmark, Trash2 } from "lucide-react";
+import { type SubmitEvent, useCallback, useEffect, useRef, useState } from "react";
+import { OperationMfaDialog } from "@/components/OperationMfaDialog";
+import { PrerequisiteAlerts, usePrerequisites } from "@/components/PrerequisiteGuard";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useI18n } from "@/i18n";
 import {
+  OperationMfaRequiredError,
   addBankWhitelist,
   addXrpWhitelist,
   getBankWhitelist,
   getXrpWhitelist,
-  OperationMfaRequiredError,
   removeBankWhitelist,
   removeXrpWhitelist,
-} from '@/lib/api';
-import { BANKS, BRANCHES, getBankName, getBranchName } from '@/lib/banks';
-import { formatDate, isValidXrpAddress } from '@/lib/format';
-import type { BankAccount, WhitelistAddress } from '@/lib/types';
-import { useAuthContext } from '@/lib/useAuthContext';
+} from "@/lib/api";
+import { BANKS, BRANCHES, getBankName, getBranchName } from "@/lib/banks";
+import { formatDate, isValidXrpAddress } from "@/lib/format";
+import type { BankAccount, WhitelistAddress } from "@/lib/types";
+import { useAuthContext } from "@/lib/useAuthContext";
 
 function XrpWhitelistTab({
   prereq,
@@ -34,12 +35,12 @@ function XrpWhitelistTab({
   const [list, setList] = useState<WhitelistAddress[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
-  const [address, setAddress] = useState('');
-  const [label, setLabel] = useState('');
-  const [recipientName, setRecipientName] = useState('');
-  const [relationship, setRelationship] = useState('');
-  const [purpose, setPurpose] = useState('');
-  const [error, setError] = useState('');
+  const [address, setAddress] = useState("");
+  const [label, setLabel] = useState("");
+  const [recipientName, setRecipientName] = useState("");
+  const [relationship, setRelationship] = useState("");
+  const [purpose, setPurpose] = useState("");
+  const [error, setError] = useState("");
   const [adding, setAdding] = useState(false);
   const [operationMfaOpen, setOperationMfaOpen] = useState(false);
   const pendingRetry = useRef<(() => Promise<void>) | null>(null);
@@ -47,7 +48,7 @@ function XrpWhitelistTab({
   function reload() {
     getXrpWhitelist()
       .then(setList)
-      .catch(() => {})
+      .catch(noop)
       .finally(() => {
         setLoading(false);
       });
@@ -55,41 +56,44 @@ function XrpWhitelistTab({
 
   useEffect(reload, []);
 
-  const submitAdd = useCallback(async () => {
-    setError('');
-    setAdding(true);
-    try {
-      await addXrpWhitelist({ address, label });
-      setAddress('');
-      setLabel('');
-      setRecipientName('');
-      setRelationship('');
-      setPurpose('');
-      setShowAdd(false);
-      reload();
-    } catch (err) {
-      if (err instanceof OperationMfaRequiredError) {
-        pendingRetry.current = submitAdd;
-        setOperationMfaOpen(true);
-      } else {
-        setError(err instanceof Error ? err.message : t('whitelist.addError'));
+  const submitAdd = useCallback(
+    async function submitAdd() {
+      setError("");
+      setAdding(true);
+      try {
+        await addXrpWhitelist({ address, label });
+        setAddress("");
+        setLabel("");
+        setRecipientName("");
+        setRelationship("");
+        setPurpose("");
+        setShowAdd(false);
+        reload();
+      } catch (err) {
+        if (err instanceof OperationMfaRequiredError) {
+          pendingRetry.current = submitAdd;
+          setOperationMfaOpen(true);
+        } else {
+          setError(err instanceof Error ? err.message : t("whitelist.addError"));
+        }
+      } finally {
+        setAdding(false);
       }
-    } finally {
-      setAdding(false);
-    }
-  }, [address, label, t]);
+    },
+    [address, label, t],
+  );
 
   async function handleAdd(e: SubmitEvent) {
     e.preventDefault();
     if (!isValidXrpAddress(address)) {
-      setError(t('whitelist.invalidXrpAddress'));
+      setError(t("whitelist.invalidXrpAddress"));
       return;
     }
     await submitAdd();
   }
 
   const submitRemove = useCallback(
-    async (addr: string) => {
+    async function submitRemove(addr: string) {
       try {
         await removeXrpWhitelist(addr);
         reload();
@@ -98,14 +102,14 @@ function XrpWhitelistTab({
           pendingRetry.current = () => submitRemove(addr);
           setOperationMfaOpen(true);
         } else {
-          setError(err instanceof Error ? err.message : t('whitelist.removeError'));
+          setError(err instanceof Error ? err.message : t("whitelist.removeError"));
         }
       }
     },
     [t],
   );
 
-  if (loading) return <p className="text-muted-foreground py-6 text-center">{t('common.loading')}</p>;
+  if (loading) return <p className="text-muted-foreground py-6 text-center">{t("common.loading")}</p>;
 
   return (
     <>
@@ -114,7 +118,7 @@ function XrpWhitelistTab({
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-base">
               <Globe className="text-primary h-4 w-4" />
-              {t('whitelist.xrpTitle')}
+              {t("whitelist.xrpTitle")}
             </CardTitle>
             <Button
               variant="outline"
@@ -124,7 +128,7 @@ function XrpWhitelistTab({
                 setShowAdd(!showAdd);
               }}
             >
-              {showAdd ? t('common.cancel') : t('common.add')}
+              {showAdd ? t("common.cancel") : t("common.add")}
             </Button>
           </div>
         </CardHeader>
@@ -135,64 +139,64 @@ function XrpWhitelistTab({
             <div className="mb-4 rounded-2xl border p-4">
               <form onSubmit={handleAdd} className="space-y-3">
                 <div className="space-y-2">
-                  <Label>{t('whitelist.addXrpLabel')}</Label>
+                  <Label>{t("whitelist.addXrpLabel")}</Label>
                   <Input
                     value={address}
                     onChange={(e) => {
                       setAddress(e.target.value);
                     }}
-                    placeholder={t('whitelist.addXrpPlaceholder')}
+                    placeholder={t("whitelist.addXrpPlaceholder")}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>{t('whitelist.label')}</Label>
+                  <Label>{t("whitelist.label")}</Label>
                   <Input
                     value={label}
                     onChange={(e) => {
                       setLabel(e.target.value);
                     }}
-                    placeholder={t('whitelist.labelPlaceholder')}
+                    placeholder={t("whitelist.labelPlaceholder")}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>{t('whitelist.recipientName')}</Label>
+                  <Label>{t("whitelist.recipientName")}</Label>
                   <Input
                     value={recipientName}
                     onChange={(e) => {
                       setRecipientName(e.target.value);
                     }}
-                    placeholder={t('whitelist.recipientNamePlaceholder')}
+                    placeholder={t("whitelist.recipientNamePlaceholder")}
                     required
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <Label>{t('whitelist.relationship')}</Label>
+                    <Label>{t("whitelist.relationship")}</Label>
                     <Select value={relationship || undefined} onValueChange={setRelationship}>
                       <SelectTrigger className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="self">{t('whitelist.relationshipSelf')}</SelectItem>
-                        <SelectItem value="family">{t('whitelist.relationshipFamily')}</SelectItem>
-                        <SelectItem value="company">{t('whitelist.relationshipCompany')}</SelectItem>
-                        <SelectItem value="other">{t('whitelist.relationshipOther')}</SelectItem>
+                        <SelectItem value="self">{t("whitelist.relationshipSelf")}</SelectItem>
+                        <SelectItem value="family">{t("whitelist.relationshipFamily")}</SelectItem>
+                        <SelectItem value="company">{t("whitelist.relationshipCompany")}</SelectItem>
+                        <SelectItem value="other">{t("whitelist.relationshipOther")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>{t('whitelist.purpose')}</Label>
+                    <Label>{t("whitelist.purpose")}</Label>
                     <Select value={purpose || undefined} onValueChange={setPurpose}>
                       <SelectTrigger className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="investment">{t('whitelist.purposeInvestment')}</SelectItem>
-                        <SelectItem value="trade">{t('whitelist.purposeTrade')}</SelectItem>
-                        <SelectItem value="personal">{t('whitelist.purposePersonal')}</SelectItem>
-                        <SelectItem value="other">{t('whitelist.purposeOther')}</SelectItem>
+                        <SelectItem value="investment">{t("whitelist.purposeInvestment")}</SelectItem>
+                        <SelectItem value="trade">{t("whitelist.purposeTrade")}</SelectItem>
+                        <SelectItem value="personal">{t("whitelist.purposePersonal")}</SelectItem>
+                        <SelectItem value="other">{t("whitelist.purposeOther")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -201,14 +205,14 @@ function XrpWhitelistTab({
                   type="submit"
                   disabled={adding || !address || !label || !recipientName || !relationship || !purpose}
                 >
-                  {adding ? t('common.adding') : t('common.add')}
+                  {adding ? t("common.adding") : t("common.add")}
                 </Button>
               </form>
             </div>
           )}
-          <p className="text-muted-foreground mb-3 text-sm">{t('common.totalCount', list.length)}</p>
+          <p className="text-muted-foreground mb-3 text-sm">{t("common.totalCount", list.length)}</p>
           {list.length === 0 ? (
-            <p className="text-muted-foreground py-8 text-center text-sm">{t('whitelist.emptyList')}</p>
+            <p className="text-muted-foreground py-8 text-center text-sm">{t("whitelist.emptyList")}</p>
           ) : (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {list.map((item) => (
@@ -222,11 +226,11 @@ function XrpWhitelistTab({
                     {item.recipientName && (
                       <div className="text-muted-foreground mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs">
                         <span>
-                          {t('whitelist.recipientName')}: {item.recipientName}
+                          {t("whitelist.recipientName")}: {item.recipientName}
                         </span>
                         {item.relationship && (
                           <span>
-                            {t('whitelist.relationship')}:{' '}
+                            {t("whitelist.relationship")}:{" "}
                             {t(
                               `whitelist.relationship${item.relationship.charAt(0).toUpperCase()}${item.relationship.slice(1)}`,
                             )}
@@ -234,7 +238,7 @@ function XrpWhitelistTab({
                         )}
                         {item.purpose && (
                           <span>
-                            {t('whitelist.purpose')}:{' '}
+                            {t("whitelist.purpose")}:{" "}
                             {t(`whitelist.purpose${item.purpose.charAt(0).toUpperCase()}${item.purpose.slice(1)}`)}
                           </span>
                         )}
@@ -283,12 +287,12 @@ function BankWhitelistTab({
   const [list, setList] = useState<BankAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
-  const [bankCode, setBankCode] = useState(Object.keys(BANKS)[0] ?? '');
-  const [branchCode, setBranchCode] = useState('');
-  const [accountNumber, setAccountNumber] = useState('');
-  const [accountHolder, setAccountHolder] = useState('');
-  const [label, setLabel] = useState('');
-  const [error, setError] = useState('');
+  const [bankCode, setBankCode] = useState(Object.keys(BANKS)[0] ?? "");
+  const [branchCode, setBranchCode] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
+  const [accountHolder, setAccountHolder] = useState("");
+  const [label, setLabel] = useState("");
+  const [error, setError] = useState("");
   const [adding, setAdding] = useState(false);
   const [operationMfaOpen, setOperationMfaOpen] = useState(false);
   const pendingRetry = useRef<(() => Promise<void>) | null>(null);
@@ -296,7 +300,7 @@ function BankWhitelistTab({
   function reload() {
     getBankWhitelist()
       .then(setList)
-      .catch(() => {})
+      .catch(noop)
       .finally(() => {
         setLoading(false);
       });
@@ -304,29 +308,32 @@ function BankWhitelistTab({
 
   useEffect(reload, []);
 
-  const submitAdd = useCallback(async () => {
-    setError('');
-    setAdding(true);
-    try {
-      await addBankWhitelist({ bankCode, branchCode, accountNumber, accountHolder, label });
-      setBankCode(Object.keys(BANKS)[0] ?? '');
-      setBranchCode('');
-      setAccountNumber('');
-      setAccountHolder('');
-      setLabel('');
-      setShowAdd(false);
-      reload();
-    } catch (err) {
-      if (err instanceof OperationMfaRequiredError) {
-        pendingRetry.current = submitAdd;
-        setOperationMfaOpen(true);
-      } else {
-        setError(err instanceof Error ? err.message : t('whitelist.addError'));
+  const submitAdd = useCallback(
+    async function submitAdd() {
+      setError("");
+      setAdding(true);
+      try {
+        await addBankWhitelist({ bankCode, branchCode, accountNumber, accountHolder, label });
+        setBankCode(Object.keys(BANKS)[0] ?? "");
+        setBranchCode("");
+        setAccountNumber("");
+        setAccountHolder("");
+        setLabel("");
+        setShowAdd(false);
+        reload();
+      } catch (err) {
+        if (err instanceof OperationMfaRequiredError) {
+          pendingRetry.current = submitAdd;
+          setOperationMfaOpen(true);
+        } else {
+          setError(err instanceof Error ? err.message : t("whitelist.addError"));
+        }
+      } finally {
+        setAdding(false);
       }
-    } finally {
-      setAdding(false);
-    }
-  }, [bankCode, branchCode, accountNumber, accountHolder, label, t]);
+    },
+    [bankCode, branchCode, accountNumber, accountHolder, label, t],
+  );
 
   async function handleAdd(e: SubmitEvent) {
     e.preventDefault();
@@ -334,7 +341,7 @@ function BankWhitelistTab({
   }
 
   const submitRemove = useCallback(
-    async (item: BankAccount) => {
+    async function submitRemove(item: BankAccount) {
       try {
         await removeBankWhitelist(`${item.branchCode}-${item.accountNumber}`);
         reload();
@@ -343,14 +350,14 @@ function BankWhitelistTab({
           pendingRetry.current = () => submitRemove(item);
           setOperationMfaOpen(true);
         } else {
-          setError(err instanceof Error ? err.message : t('whitelist.removeError'));
+          setError(err instanceof Error ? err.message : t("whitelist.removeError"));
         }
       }
     },
     [t],
   );
 
-  if (loading) return <p className="text-muted-foreground py-6 text-center">{t('common.loading')}</p>;
+  if (loading) return <p className="text-muted-foreground py-6 text-center">{t("common.loading")}</p>;
 
   return (
     <>
@@ -359,7 +366,7 @@ function BankWhitelistTab({
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-base">
               <Landmark className="text-primary h-4 w-4" />
-              {t('whitelist.bankTitle')}
+              {t("whitelist.bankTitle")}
             </CardTitle>
             <Button
               variant="outline"
@@ -369,7 +376,7 @@ function BankWhitelistTab({
                 setShowAdd(!showAdd);
               }}
             >
-              {showAdd ? t('common.cancel') : t('common.add')}
+              {showAdd ? t("common.cancel") : t("common.add")}
             </Button>
           </div>
         </CardHeader>
@@ -380,18 +387,18 @@ function BankWhitelistTab({
             <div className="mb-4 rounded-2xl border p-4">
               <form onSubmit={handleAdd} className="space-y-3">
                 <div className="space-y-2">
-                  <Label>{t('whitelist.label')}</Label>
+                  <Label>{t("whitelist.label")}</Label>
                   <Input
                     value={label}
                     onChange={(e) => {
                       setLabel(e.target.value);
                     }}
-                    placeholder={t('whitelist.labelPlaceholder')}
+                    placeholder={t("whitelist.labelPlaceholder")}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>{t('whitelist.bankLabel')}</Label>
+                  <Label>{t("whitelist.bankLabel")}</Label>
                   <Select value={bankCode} onValueChange={setBankCode}>
                     <SelectTrigger className="w-full">
                       <SelectValue />
@@ -407,10 +414,10 @@ function BankWhitelistTab({
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
-                    <Label>{t('whitelist.branchLabel')}</Label>
+                    <Label>{t("whitelist.branchLabel")}</Label>
                     <Select value={branchCode || undefined} onValueChange={setBranchCode}>
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder={t('whitelist.branchSelect')} />
+                        <SelectValue placeholder={t("whitelist.branchSelect")} />
                       </SelectTrigger>
                       <SelectContent>
                         {Object.entries(BRANCHES).map(([code, name]) => (
@@ -422,25 +429,25 @@ function BankWhitelistTab({
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>{t('whitelist.accountNumber')}</Label>
+                    <Label>{t("whitelist.accountNumber")}</Label>
                     <Input
                       value={accountNumber}
                       onChange={(e) => {
                         setAccountNumber(e.target.value);
                       }}
-                      placeholder={t('whitelist.accountNumberPlaceholder')}
+                      placeholder={t("whitelist.accountNumberPlaceholder")}
                       required
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>{t('whitelist.accountHolderLabel')}</Label>
+                  <Label>{t("whitelist.accountHolderLabel")}</Label>
                   <Input
                     value={accountHolder}
                     onChange={(e) => {
                       setAccountHolder(e.target.value);
                     }}
-                    placeholder={t('whitelist.accountHolderPlaceholder')}
+                    placeholder={t("whitelist.accountHolderPlaceholder")}
                     required
                   />
                 </div>
@@ -448,14 +455,14 @@ function BankWhitelistTab({
                   type="submit"
                   disabled={adding || !bankCode || !branchCode || !accountNumber || !accountHolder || !label}
                 >
-                  {adding ? t('common.adding') : t('common.add')}
+                  {adding ? t("common.adding") : t("common.add")}
                 </Button>
               </form>
             </div>
           )}
-          <p className="text-muted-foreground mb-3 text-sm">{t('common.totalCount', list.length)}</p>
+          <p className="text-muted-foreground mb-3 text-sm">{t("common.totalCount", list.length)}</p>
           {list.length === 0 ? (
-            <p className="text-muted-foreground py-8 text-center text-sm">{t('whitelist.emptyList')}</p>
+            <p className="text-muted-foreground py-8 text-center text-sm">{t("whitelist.emptyList")}</p>
           ) : (
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {list.map((item) => (
@@ -514,10 +521,10 @@ export function WhitelistPage() {
       <Tabs defaultValue="bank">
         <TabsList className="mb-4 w-full">
           <TabsTrigger value="bank" className="flex-1">
-            {t('whitelist.bankTab')}
+            {t("whitelist.bankTab")}
           </TabsTrigger>
           <TabsTrigger value="xrp" className="flex-1">
-            {t('whitelist.xrpTab')}
+            {t("whitelist.xrpTab")}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="bank">

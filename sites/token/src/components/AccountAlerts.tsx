@@ -1,10 +1,10 @@
-import { ShieldAlert, UserX } from 'lucide-react';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { KycDialog } from '@/components/KycDialog';
-import { useI18n } from '@/i18n';
-import { useAuth } from '@/lib/auth';
-import type { User } from '@/lib/types';
+import { ShieldAlert, UserX } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { KycDialog } from "@/components/KycDialog";
+import { useI18n } from "@/i18n";
+import { useAuth } from "@/lib/auth";
+import type { User } from "@/lib/types";
 
 export function AccountAlerts({ user, onKycComplete }: { user: User; onKycComplete?: () => void }) {
   const navigate = useNavigate();
@@ -13,7 +13,7 @@ export function AccountAlerts({ user, onKycComplete }: { user: User; onKycComple
   const [kycOpen, setKycOpen] = useState(false);
 
   const showMfa = !hasTotpMfa;
-  const showKyc = user.kycStatus !== 'approved';
+  const showKyc = user.kycStatus !== "approved";
 
   if (!showMfa && !showKyc) return null;
 
@@ -22,13 +22,13 @@ export function AccountAlerts({ user, onKycComplete }: { user: User; onKycComple
       {showMfa && (
         <button
           type="button"
-          onClick={() => navigate('/settings')}
+          onClick={() => navigate("/settings")}
           className="flex w-full items-center gap-3 rounded-4xl border border-amber-200 bg-amber-50 px-4 py-3 text-left transition-colors hover:bg-amber-100"
         >
           <ShieldAlert className="h-5 w-5 shrink-0 text-amber-600" />
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium">{t('alerts.mfaTitle')}</p>
-            <p className="text-muted-foreground text-xs">{t('alerts.mfaDescription')}</p>
+            <p className="text-sm font-medium">{t("alerts.mfaTitle")}</p>
+            <p className="text-muted-foreground text-xs">{t("alerts.mfaDescription")}</p>
           </div>
           <span className="text-muted-foreground shrink-0 text-xs">&rsaquo;</span>
         </button>
@@ -44,8 +44,8 @@ export function AccountAlerts({ user, onKycComplete }: { user: User; onKycComple
           >
             <UserX className="h-5 w-5 shrink-0 text-blue-600" />
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium">{t('alerts.kycTitle')}</p>
-              <p className="text-muted-foreground text-xs">{t('alerts.kycDescription')}</p>
+              <p className="text-sm font-medium">{t("alerts.kycTitle")}</p>
+              <p className="text-muted-foreground text-xs">{t("alerts.kycDescription")}</p>
             </div>
             <span className="text-muted-foreground shrink-0 text-xs">&rsaquo;</span>
           </button>

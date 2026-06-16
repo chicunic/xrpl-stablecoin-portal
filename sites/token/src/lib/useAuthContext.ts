@@ -1,5 +1,5 @@
-import { useOutletContext } from 'react-router-dom';
-import type { Token, TrustlineInfo, User, VirtualAccount } from '@/lib/types';
+import { useOutletContext } from "react-router-dom";
+import type { Token, TrustlineInfo, User, VirtualAccount } from "@/lib/types";
 
 interface AuthContext {
   user: User;

@@ -45,12 +45,12 @@ Users are assigned a custodial XRPL wallet on registration. Before receiving any
 
 ### Security & Compliance
 
-| Layer | Implementation |
-| - | - |
-| **Authentication** | Firebase Authentication with Google OAuth |
-| **MFA** | TOTP-based (Google Authenticator compatible). Required at login if enrolled, and on-demand for sensitive operations (withdrawals, whitelist changes) via short-lived MFA tokens |
-| **KYC** | Identity verification with Japanese address validation (postal code auto-lookup via zipcloud API), phone verification, and full-width character validation |
-| **Whitelist** | Both bank accounts and XRPL addresses must be pre-approved before they can be used as withdrawal destinations. Adding/removing entries requires MFA |
+| Layer              | Implementation                                                                                                                                                                        |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Authentication** | Firebase Authentication with Google OAuth                                                                                                                                             |
+| **MFA**            | TOTP-based (Google Authenticator compatible).<br>Required at login if enrolled, and on-demand for sensitive operations (withdrawals, whitelist changes)<br>via short-lived MFA tokens |
+| **KYC**            | Identity verification with Japanese address validation (postal code auto-lookup via zipcloud API),<br>phone verification, and full-width character validation                         |
+| **Whitelist**      | Both bank accounts and XRPL addresses must be pre-approved before they can be used as withdrawal destinations.<br>Adding/removing entries requires MFA                                |
 
 ### Internationalization
 
@@ -68,17 +68,17 @@ A traditional banking interface for account operations:
 
 ## Tech Stack
 
-| Category | Technology |
-| - | - |
-| Framework | React 19, TypeScript 6 |
-| Build | Vite 8, pnpm workspaces |
-| Styling | Tailwind CSS 4, Radix UI, shadcn/ui |
-| Auth | Firebase Authentication (OAuth + TOTP MFA) |
-| Blockchain | XRP Ledger (Testnet / Devnet / Mainnet) |
-| Routing | React Router v7 |
-| Linting | ESLint 10, Prettier 3 |
-| Deployment | Firebase Hosting, Google Cloud Build |
-| Utilities | qrcode.react, input-otp, ripple-address-codec, lucide-react |
+| Category   | Technology                                                  |
+| ---------- | ----------------------------------------------------------- |
+| Framework  | React 19, TypeScript 6                                      |
+| Build      | Vite 8, pnpm workspaces                                     |
+| Styling    | Tailwind CSS 4, Radix UI, shadcn/ui                         |
+| Auth       | Firebase Authentication (OAuth + TOTP MFA)                  |
+| Blockchain | XRP Ledger (Testnet / Devnet / Mainnet)                     |
+| Routing    | React Router v7                                             |
+| Linting    | ESLint 10, Prettier 3                                       |
+| Deployment | Firebase Hosting, Google Cloud Build                        |
+| Utilities  | qrcode.react, input-otp, ripple-address-codec, lucide-react |
 
 ## License
 

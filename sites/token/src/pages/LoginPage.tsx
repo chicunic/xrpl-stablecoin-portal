@@ -1,33 +1,33 @@
-import { type SubmitEvent, useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Header } from '@/components/Header';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
-import { useI18n } from '@/i18n';
-import { useAuth } from '@/lib/auth';
+import { type SubmitEvent, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Header } from "@/components/Header";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { useI18n } from "@/i18n";
+import { useAuth } from "@/lib/auth";
 
 export function LoginPage() {
   const navigate = useNavigate();
   const { t } = useI18n();
   const { user, loading, signInWithGoogle, mfaResolver, verifyMfaCode } = useAuth();
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [signingIn, setSigningIn] = useState(false);
-  const [mfaCode, setMfaCode] = useState('');
+  const [mfaCode, setMfaCode] = useState("");
   const [mfaLoading, setMfaLoading] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    if (!loading && user) void navigate('/', { replace: true });
+    if (!loading && user) void navigate("/", { replace: true });
   }, [user, loading, navigate]);
 
   async function handleGoogleLogin() {
-    setError('');
+    setError("");
     setSigningIn(true);
     try {
       await signInWithGoogle();
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('login.error'));
+      setError(err instanceof Error ? err.message : t("login.error"));
     } finally {
       setSigningIn(false);
     }
@@ -36,12 +36,12 @@ export function LoginPage() {
   async function handleMfaSubmit(e: SubmitEvent) {
     e.preventDefault();
     if (!mfaCode.trim()) return;
-    setError('');
+    setError("");
     setMfaLoading(true);
     try {
       await verifyMfaCode(mfaCode.trim());
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('login.mfaError'));
+      setError(err instanceof Error ? err.message : t("login.mfaError"));
     } finally {
       setMfaLoading(false);
     }
@@ -55,12 +55,12 @@ export function LoginPage() {
         <Card className="w-full max-w-sm">
           <CardHeader className="text-center">
             <img src="/logo-full.svg" alt="NexBridge" className="mx-auto mb-2 h-10" />
-            <CardTitle className="text-xl">{t('login.title')}</CardTitle>
+            <CardTitle className="text-xl">{t("login.title")}</CardTitle>
           </CardHeader>
           <CardContent className="flex min-h-[160px] flex-col items-stretch justify-center space-y-4">
             {mfaResolver ? (
               <form ref={formRef} onSubmit={handleMfaSubmit} className="space-y-4">
-                <p className="text-muted-foreground text-center text-sm">{t('login.mfaPrompt')}</p>
+                <p className="text-muted-foreground text-center text-sm">{t("login.mfaPrompt")}</p>
                 <InputOTP
                   maxLength={6}
                   value={mfaCode}
@@ -78,12 +78,12 @@ export function LoginPage() {
                   </InputOTPGroup>
                 </InputOTP>
                 <Button type="submit" className="w-full" disabled={mfaLoading || mfaCode.length !== 6}>
-                  {mfaLoading ? t('login.mfaVerifying') : t('login.mfaVerify')}
+                  {mfaLoading ? t("login.mfaVerifying") : t("login.mfaVerify")}
                 </Button>
               </form>
             ) : (
               <>
-                <p className="text-muted-foreground text-center text-sm">{t('login.description')}</p>
+                <p className="text-muted-foreground text-center text-sm">{t("login.description")}</p>
                 <Button onClick={handleGoogleLogin} disabled={signingIn} className="w-full" variant="outline">
                   <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24" role="img" aria-label="Google">
                     <path
@@ -103,7 +103,7 @@ export function LoginPage() {
                       fill="#EA4335"
                     />
                   </svg>
-                  {signingIn ? t('login.signingIn') : t('login.googleButton')}
+                  {signingIn ? t("login.signingIn") : t("login.googleButton")}
                 </Button>
               </>
             )}

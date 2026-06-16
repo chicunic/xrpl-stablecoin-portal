@@ -1,38 +1,38 @@
-import { type SubmitEvent, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Header } from '@/components/Header';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { login } from '@/lib/api';
-import { saveAccount, saveToken } from '@/lib/auth';
-import { BRANCHES } from '@/lib/constants';
+import { type SubmitEvent, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Header } from "@/components/Header";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { login } from "@/lib/api";
+import { saveAccount, saveToken } from "@/lib/auth";
+import { BRANCHES } from "@/lib/constants";
 
-type AccountType = 'personal' | 'corporate';
+type AccountType = "personal" | "corporate";
 
 function LoginForm({ accountType }: { accountType: AccountType }) {
   const navigate = useNavigate();
-  const [branchCode, setBranchCode] = useState('');
-  const [accountNumber, setAccountNumber] = useState('');
-  const [pin, setPin] = useState('');
-  const [error, setError] = useState('');
+  const [branchCode, setBranchCode] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
+  const [pin, setPin] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const branches = BRANCHES.filter((b) => b.accountType === accountType);
 
   async function handleSubmit(e: SubmitEvent) {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
     try {
       const { token, account } = await login({ branchCode, accountNumber, pin });
       saveToken(token);
       saveAccount(account);
-      void navigate('/');
+      void navigate("/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'ログインに失敗しました');
+      setError(err instanceof Error ? err.message : "ログインに失敗しました");
     } finally {
       setLoading(false);
     }
@@ -69,7 +69,7 @@ function LoginForm({ accountType }: { accountType: AccountType }) {
           maxLength={7}
           value={accountNumber}
           onChange={(e) => {
-            setAccountNumber(e.target.value.replace(/\D/g, ''));
+            setAccountNumber(e.target.value.replace(/\D/g, ""));
           }}
           placeholder="口座番号を入力（7桁）"
           required
@@ -84,7 +84,7 @@ function LoginForm({ accountType }: { accountType: AccountType }) {
           maxLength={4}
           value={pin}
           onChange={(e) => {
-            setPin(e.target.value.replace(/\D/g, ''));
+            setPin(e.target.value.replace(/\D/g, ""));
           }}
           placeholder="暗証番号を入力"
           required
@@ -96,7 +96,7 @@ function LoginForm({ accountType }: { accountType: AccountType }) {
         className="w-full"
         disabled={loading || !branchCode || accountNumber.length !== 7 || pin.length !== 4}
       >
-        {loading ? 'ログイン中...' : 'ログイン'}
+        {loading ? "ログイン中..." : "ログイン"}
       </Button>
     </form>
   );

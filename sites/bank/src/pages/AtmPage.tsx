@@ -1,13 +1,13 @@
-import { type SubmitEvent, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { deposit, withdraw } from '@/lib/api';
-import { formatCurrency } from '@/lib/format';
-import { useAuthContext } from '@/lib/useAuthContext';
+import { type SubmitEvent, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { deposit, withdraw } from "@/lib/api";
+import { formatCurrency } from "@/lib/format";
+import { useAuthContext } from "@/lib/useAuthContext";
 
 interface AtmFormProps {
   id: string;
@@ -33,21 +33,21 @@ function AtmForm({
   onSuccess,
 }: AtmFormProps) {
   const navigate = useNavigate();
-  const [amount, setAmount] = useState('');
-  const [pin, setPin] = useState('');
-  const [error, setError] = useState('');
+  const [amount, setAmount] = useState("");
+  const [pin, setPin] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<number | null>(null);
 
   function reset() {
     setResult(null);
-    setAmount('');
-    setPin('');
+    setAmount("");
+    setPin("");
   }
 
   async function handleSubmit(e: SubmitEvent) {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
     try {
       const res = await onSubmit(Number(amount), pin);
@@ -75,7 +75,7 @@ function AtmForm({
               <Button variant="outline" className="flex-1" onClick={reset}>
                 {continueLabel}
               </Button>
-              <Button className="flex-1" onClick={() => navigate('/')}>
+              <Button className="flex-1" onClick={() => navigate("/")}>
                 ホームへ戻る
               </Button>
             </div>
@@ -114,7 +114,7 @@ function AtmForm({
                 maxLength={4}
                 value={pin}
                 onChange={(e) => {
-                  setPin(e.target.value.replace(/\D/g, ''));
+                  setPin(e.target.value.replace(/\D/g, ""));
                 }}
                 placeholder="暗証番号を入力"
                 required
@@ -126,7 +126,7 @@ function AtmForm({
               className="w-full"
               disabled={loading || !amount || pin.length !== 4 || (balance !== undefined && Number(amount) > balance)}
             >
-              {loading ? '処理中...' : submitLabel}
+              {loading ? "処理中..." : submitLabel}
             </Button>
           </form>
         )}

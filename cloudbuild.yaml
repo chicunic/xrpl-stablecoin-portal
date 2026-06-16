@@ -1,54 +1,54 @@
 substitutions:
-  _VITE_FIREBASE_API_KEY: ''
-  _VITE_FIREBASE_AUTH_DOMAIN: ''
-  _VITE_FIREBASE_PROJECT_ID: ''
-  _TOKEN_BACKEND_URL: ''
-  _BANK_BACKEND_URL: ''
+  _VITE_FIREBASE_API_KEY: ""
+  _VITE_FIREBASE_AUTH_DOMAIN: ""
+  _VITE_FIREBASE_PROJECT_ID: ""
+  _TOKEN_BACKEND_URL: ""
+  _BANK_BACKEND_URL: ""
 
 steps:
   # Install dependencies
-  - name: node:24-slim
+  - name: node:26-slim
     id: install
     entrypoint: bash
     args:
       - -c
-      - corepack enable && pnpm install --frozen-lockfile
+      - npm install -g pnpm@11.6.0 && pnpm install --frozen-lockfile
 
   # Build bank
-  - name: node:24-slim
+  - name: node:26-slim
     id: build-bank
     entrypoint: bash
     args:
       - -c
-      - corepack enable && VITE_API_BASE=${_BANK_BACKEND_URL} pnpm build:bank
-    waitFor: ['install']
+      - npm install -g pnpm@11.6.0 && VITE_API_BASE=${_BANK_BACKEND_URL} pnpm build:bank
+    waitFor: ["install"]
 
   # Build token
-  - name: node:24-slim
+  - name: node:26-slim
     id: build-token
     entrypoint: bash
     args:
       - -c
-      - corepack enable && VITE_FIREBASE_API_KEY=${_VITE_FIREBASE_API_KEY} VITE_FIREBASE_AUTH_DOMAIN=${_VITE_FIREBASE_AUTH_DOMAIN} VITE_FIREBASE_PROJECT_ID=${_VITE_FIREBASE_PROJECT_ID} VITE_API_BASE=${_TOKEN_BACKEND_URL} pnpm build:token
-    waitFor: ['install']
+      - npm install -g pnpm@11.6.0 && VITE_FIREBASE_API_KEY=${_VITE_FIREBASE_API_KEY} VITE_FIREBASE_AUTH_DOMAIN=${_VITE_FIREBASE_AUTH_DOMAIN} VITE_FIREBASE_PROJECT_ID=${_VITE_FIREBASE_PROJECT_ID} VITE_API_BASE=${_TOKEN_BACKEND_URL} pnpm build:token
+    waitFor: ["install"]
 
   # Deploy bank to Firebase Hosting
-  - name: node:24-slim
+  - name: node:26-slim
     id: deploy-bank
     entrypoint: bash
     args:
       - -c
       - npm install -g firebase-tools && firebase deploy --only hosting:xrpl-bank --project ${_VITE_FIREBASE_PROJECT_ID}
-    waitFor: ['build-bank']
+    waitFor: ["build-bank"]
 
   # Deploy token to Firebase Hosting
-  - name: node:24-slim
+  - name: node:26-slim
     id: deploy-token
     entrypoint: bash
     args:
       - -c
       - npm install -g firebase-tools && firebase deploy --only hosting:xrpl-token --project ${_VITE_FIREBASE_PROJECT_ID}
-    waitFor: ['build-token']
+    waitFor: ["build-token"]
 
 options:
   logging: CLOUD_LOGGING_ONLY

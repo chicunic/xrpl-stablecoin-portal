@@ -1,18 +1,18 @@
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { clearAuth, isLoggedIn } from '@/lib/auth';
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { clearAuth, isLoggedIn } from "@/lib/auth";
 
 export function Header({ accountHolder }: { accountHolder?: string }) {
   const navigate = useNavigate();
 
   function handleLogout() {
     clearAuth();
-    void navigate('/login');
+    void navigate("/login");
   }
 
   function handleHome() {
-    void navigate(isLoggedIn() ? '/' : '/login');
+    void navigate(isLoggedIn() ? "/" : "/login");
   }
 
   return (

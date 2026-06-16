@@ -1,6 +1,6 @@
-import { ShieldCheck } from 'lucide-react';
-import { useCallback, useRef, useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { ShieldCheck } from "lucide-react";
+import { useCallback, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,10 +8,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
-import { useI18n } from '@/i18n';
-import { verifyOperationMfa } from '@/lib/api';
+} from "@/components/ui/dialog";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { useI18n } from "@/i18n";
+import { verifyOperationMfa } from "@/lib/api";
 
 interface OperationMfaDialogProps {
   open: boolean;
@@ -22,14 +22,14 @@ interface OperationMfaDialogProps {
 export function OperationMfaDialog({ open, onClose, onVerified }: OperationMfaDialogProps) {
   const { t } = useI18n();
   const [verifying, setVerifying] = useState(false);
-  const [error, setError] = useState('');
-  const [totpCode, setTotpCode] = useState('');
+  const [error, setError] = useState("");
+  const [totpCode, setTotpCode] = useState("");
   const verifyingRef = useRef(false);
 
   function reset() {
     setVerifying(false);
-    setError('');
-    setTotpCode('');
+    setError("");
+    setTotpCode("");
   }
 
   function handleClose() {
@@ -40,17 +40,17 @@ export function OperationMfaDialog({ open, onClose, onVerified }: OperationMfaDi
 
   const handleVerify = useCallback(
     async (code: string) => {
-      if (!code || code.length !== 6 || verifyingRef.current) return;
+      if (code.length !== 6 || verifyingRef.current) return;
       verifyingRef.current = true;
-      setError('');
+      setError("");
       setVerifying(true);
       try {
         await verifyOperationMfa(code);
         reset();
         onVerified();
       } catch {
-        setError(t('mfa.operationError'));
-        setTotpCode('');
+        setError(t("mfa.operationError"));
+        setTotpCode("");
         setVerifying(false);
       } finally {
         verifyingRef.current = false;
@@ -70,9 +70,9 @@ export function OperationMfaDialog({ open, onClose, onVerified }: OperationMfaDi
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ShieldCheck className="h-5 w-5" />
-            {t('mfa.operationTitle')}
+            {t("mfa.operationTitle")}
           </DialogTitle>
-          <DialogDescription>{t('mfa.operationEnterCode')}</DialogDescription>
+          <DialogDescription>{t("mfa.operationEnterCode")}</DialogDescription>
         </DialogHeader>
 
         <div className="flex justify-center">
@@ -98,10 +98,10 @@ export function OperationMfaDialog({ open, onClose, onVerified }: OperationMfaDi
 
         <DialogFooter>
           <Button variant="outline" onClick={handleClose} disabled={verifying}>
-            {t('common.cancel')}
+            {t("common.cancel")}
           </Button>
           <Button onClick={() => void handleVerify(totpCode)} disabled={verifying || totpCode.length !== 6}>
-            {verifying ? t('mfa.operationVerifying') : t('login.mfaVerify')}
+            {verifying ? t("mfa.operationVerifying") : t("login.mfaVerify")}
           </Button>
         </DialogFooter>
       </DialogContent>

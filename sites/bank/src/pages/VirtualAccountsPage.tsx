@@ -1,19 +1,20 @@
-import { type SubmitEvent, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { createVirtualAccount, listVirtualAccounts, updateVirtualAccount } from '@/lib/api';
-import type { BankVirtualAccount } from '@/lib/types';
-import { useAuthContext } from '@/lib/useAuthContext';
+import { noop } from "@xrpl-stablecoin-portal/shared";
+import { type SubmitEvent, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { createVirtualAccount, listVirtualAccounts, updateVirtualAccount } from "@/lib/api";
+import type { BankVirtualAccount } from "@/lib/types";
+import { useAuthContext } from "@/lib/useAuthContext";
 
 function StatusBadge({ isActive }: { isActive: boolean }) {
   return (
-    <Badge variant={isActive ? 'default' : 'secondary'} className="text-xs">
-      {isActive ? '有効' : '無効'}
+    <Badge variant={isActive ? "default" : "secondary"} className="text-xs">
+      {isActive ? "有効" : "無効"}
     </Badge>
   );
 }
@@ -24,14 +25,14 @@ export function VirtualAccountsPage() {
   const [virtualAccounts, setVirtualAccounts] = useState<BankVirtualAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
-  const [newLabel, setNewLabel] = useState('');
+  const [newLabel, setNewLabel] = useState("");
   const [creating, setCreating] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     listVirtualAccounts()
       .then(setVirtualAccounts)
-      .catch(() => {})
+      .catch(noop)
       .finally(() => {
         setLoading(false);
       });
@@ -44,15 +45,15 @@ export function VirtualAccountsPage() {
 
   async function handleCreate(e: SubmitEvent) {
     e.preventDefault();
-    setError('');
+    setError("");
     setCreating(true);
     try {
       await createVirtualAccount(newLabel);
-      setNewLabel('');
+      setNewLabel("");
       setShowCreate(false);
       await reload();
     } catch (err) {
-      setError(err instanceof Error ? err.message : '作成に失敗しました');
+      setError(err instanceof Error ? err.message : "作成に失敗しました");
     } finally {
       setCreating(false);
     }
@@ -65,17 +66,17 @@ export function VirtualAccountsPage() {
       });
       await reload();
     } catch (err) {
-      setError(err instanceof Error ? err.message : '更新に失敗しました');
+      setError(err instanceof Error ? err.message : "更新に失敗しました");
     }
   }
 
-  if (account.accountType !== 'corporate') {
+  if (account.accountType !== "corporate") {
     return (
       <div className="mx-auto max-w-md px-4 py-6">
         <Card>
           <CardContent className="py-8 text-center">
             <p className="text-muted-foreground text-sm">バーチャル口座は法人口座のみご利用いただけます</p>
-            <Button variant="outline" className="mt-4" onClick={() => navigate('/')}>
+            <Button variant="outline" className="mt-4" onClick={() => navigate("/")}>
               トップへ戻る
             </Button>
           </CardContent>
@@ -103,7 +104,7 @@ export function VirtualAccountsPage() {
             setShowCreate(!showCreate);
           }}
         >
-          {showCreate ? 'キャンセル' : '新規作成'}
+          {showCreate ? "キャンセル" : "新規作成"}
         </Button>
       </div>
 
@@ -129,7 +130,7 @@ export function VirtualAccountsPage() {
                 />
               </div>
               <Button type="submit" className="self-end" disabled={creating || !newLabel}>
-                {creating ? '作成中...' : '作成'}
+                {creating ? "作成中..." : "作成"}
               </Button>
             </form>
           </CardContent>
@@ -160,7 +161,7 @@ export function VirtualAccountsPage() {
                         <span className="font-mono">{va.accountNumber}</span>
                       </div>
                       <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => handleToggleActive(va)}>
-                        {va.isActive ? '無効化' : '有効化'}
+                        {va.isActive ? "無効化" : "有効化"}
                       </Button>
                     </div>
                   </div>
@@ -189,7 +190,7 @@ export function VirtualAccountsPage() {
                         </TableCell>
                         <TableCell className="text-right">
                           <Button variant="ghost" size="sm" onClick={() => handleToggleActive(va)}>
-                            {va.isActive ? '無効化' : '有効化'}
+                            {va.isActive ? "無効化" : "有効化"}
                           </Button>
                         </TableCell>
                       </TableRow>

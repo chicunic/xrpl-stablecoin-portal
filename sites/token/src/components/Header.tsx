@@ -1,9 +1,9 @@
-import { useNavigate } from 'react-router-dom';
-import { LanguageSwitcher } from '@/components/LanguageSwitcher';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { useI18n } from '@/i18n';
-import { useAuth } from '@/lib/auth';
+import { useNavigate } from "react-router-dom";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { useI18n } from "@/i18n";
+import { useAuth } from "@/lib/auth";
 
 export function Header({ name }: { name?: string }) {
   const navigate = useNavigate();
@@ -12,11 +12,11 @@ export function Header({ name }: { name?: string }) {
 
   async function handleLogout() {
     await logout();
-    void navigate('/login');
+    void navigate("/login");
   }
 
   function handleHome() {
-    void navigate(user ? '/' : '/login');
+    void navigate(user ? "/" : "/login");
   }
 
   return (
@@ -29,15 +29,15 @@ export function Header({ name }: { name?: string }) {
         >
           <img src="/logo-full.svg" alt="NexBridge" className="h-7 sm:h-8" />
           <Separator orientation="vertical" className="hidden h-5 sm:block" />
-          <span className="text-muted-foreground hidden text-sm sm:inline">{t('header.subtitle')}</span>
+          <span className="text-muted-foreground hidden text-sm sm:inline">{t("header.subtitle")}</span>
         </button>
         <div className="flex items-center gap-2 sm:gap-3">
           <LanguageSwitcher />
           {name && (
             <>
-              <span className="text-muted-foreground hidden text-sm sm:inline">{t('common.honorific', name)}</span>
+              <span className="text-muted-foreground hidden text-sm sm:inline">{t("common.honorific", name)}</span>
               <Button variant="outline" size="sm" onClick={handleLogout}>
-                {t('header.logout')}
+                {t("header.logout")}
               </Button>
             </>
           )}

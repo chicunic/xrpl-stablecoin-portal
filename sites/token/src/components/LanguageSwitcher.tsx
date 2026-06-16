@@ -1,6 +1,6 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useI18n } from '@/i18n';
-import { LOCALE_LABELS, type Locale } from '@/i18n/config';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useI18n } from "@/i18n";
+import { LOCALE_LABELS, type Locale } from "@/i18n/config";
 
 const locales = Object.keys(LOCALE_LABELS) as Locale[];
 

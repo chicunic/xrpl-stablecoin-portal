@@ -1,34 +1,35 @@
-import { ArrowRight, ExternalLink, Shield } from 'lucide-react';
-import { type SubmitEvent, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { OperationMfaDialog } from '@/components/OperationMfaDialog';
-import { PrerequisiteAlerts, usePrerequisites } from '@/components/PrerequisiteGuard';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useI18n } from '@/i18n';
+import { noop } from "@xrpl-stablecoin-portal/shared";
+import { ArrowRight, ExternalLink, Shield } from "lucide-react";
+import { type SubmitEvent, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { OperationMfaDialog } from "@/components/OperationMfaDialog";
+import { PrerequisiteAlerts, usePrerequisites } from "@/components/PrerequisiteGuard";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useI18n } from "@/i18n";
 import {
+  OperationMfaRequiredError,
   getBankWhitelist,
   getXrpBalance,
   getXrpWhitelist,
-  OperationMfaRequiredError,
   withdrawFiat,
   withdrawXrp,
-} from '@/lib/api';
-import { getBankName, getBranchName } from '@/lib/banks';
-import { formatCurrency, formatTokenAmount } from '@/lib/format';
+} from "@/lib/api";
+import { getBankName, getBranchName } from "@/lib/banks";
+import { formatCurrency, formatTokenAmount } from "@/lib/format";
 import type {
   BankAccount,
   FiatWithdrawalResult,
   TrustlineInfo,
   WhitelistAddress,
   XrpWithdrawalResult,
-} from '@/lib/types';
-import { useAuthContext } from '@/lib/useAuthContext';
-import { cn } from '@/lib/utils';
-import { explorerTxUrl } from '@/lib/xrpl';
+} from "@/lib/types";
+import { useAuthContext } from "@/lib/useAuthContext";
+import { cn } from "@/lib/utils";
+import { explorerTxUrl } from "@/lib/xrpl";
 
 interface TokenBalanceDisplay extends TrustlineInfo {
   balance: number;
@@ -45,9 +46,9 @@ function FiatWithdrawForm({
   const { user, refreshAll } = useAuthContext();
   const { t } = useI18n();
   const [bankList, setBankList] = useState<BankAccount[]>([]);
-  const [selectedBank, setSelectedBank] = useState('');
-  const [amount, setAmount] = useState('');
-  const [error, setError] = useState('');
+  const [selectedBank, setSelectedBank] = useState("");
+  const [amount, setAmount] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [operationMfaOpen, setOperationMfaOpen] = useState(false);
   const [listLoading, setListLoading] = useState(true);
@@ -57,9 +58,10 @@ function FiatWithdrawForm({
     getBankWhitelist()
       .then((list) => {
         setBankList(list);
-        if (list.length > 0) setSelectedBank(`${list[0].branchCode}-${list[0].accountNumber}`);
+        const first = list[0];
+        if (first) setSelectedBank(`${first.branchCode}-${first.accountNumber}`);
       })
-      .catch(() => {})
+      .catch(noop)
       .finally(() => {
         setListLoading(false);
       });
@@ -69,7 +71,7 @@ function FiatWithdrawForm({
 
   async function submitWithdraw() {
     if (!chosen) return;
-    setError('');
+    setError("");
     setLoading(true);
     try {
       const res = await withdrawFiat({
@@ -82,7 +84,7 @@ function FiatWithdrawForm({
       if (err instanceof OperationMfaRequiredError) {
         setOperationMfaOpen(true);
       } else {
-        setError(err instanceof Error ? err.message : t('withdraw.fiatError'));
+        setError(err instanceof Error ? err.message : t("withdraw.fiatError"));
       }
     } finally {
       setLoading(false);
@@ -96,11 +98,11 @@ function FiatWithdrawForm({
 
   function reset() {
     setResult(null);
-    setAmount('');
-    setError('');
+    setAmount("");
+    setError("");
   }
 
-  if (listLoading) return <p className="text-muted-foreground py-6 text-center">{t('common.loading')}</p>;
+  if (listLoading) return <p className="text-muted-foreground py-6 text-center">{t("common.loading")}</p>;
 
   return (
     <>
@@ -108,7 +110,7 @@ function FiatWithdrawForm({
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <ArrowRight className="h-4 w-4 text-rose-600" />
-            {t('withdraw.fiatTitle')}
+            {t("withdraw.fiatTitle")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -118,30 +120,30 @@ function FiatWithdrawForm({
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <Shield className="h-5 w-5 text-amber-600" />
-                  <p className="text-sm font-medium">{t('withdraw.noBankWhitelistTitle')}</p>
+                  <p className="text-sm font-medium">{t("withdraw.noBankWhitelistTitle")}</p>
                 </div>
-                <p className="text-muted-foreground text-sm">{t('withdraw.noBankWhitelist')}</p>
+                <p className="text-muted-foreground text-sm">{t("withdraw.noBankWhitelist")}</p>
               </div>
-              <Button variant="outline" size="sm" className="shrink-0" onClick={() => navigate('/whitelist')}>
-                {t('common.goToWhitelist')}
+              <Button variant="outline" size="sm" className="shrink-0" onClick={() => navigate("/whitelist")}>
+                {t("common.goToWhitelist")}
               </Button>
             </div>
           )}
           {result ? (
             <div className="space-y-4 text-center">
-              <p className="text-muted-foreground text-sm">{t('withdraw.fiatCompleted')}</p>
+              <p className="text-muted-foreground text-sm">{t("withdraw.fiatCompleted")}</p>
               <p className="text-2xl font-semibold">{formatCurrency(result.amount)}</p>
               {result.txReference && (
                 <p className="text-muted-foreground font-mono text-xs">
-                  {t('withdraw.referenceNumber')}: {result.txReference}
+                  {t("withdraw.referenceNumber")}: {result.txReference}
                 </p>
               )}
               <div className="flex gap-2">
                 <Button variant="outline" className="flex-1" onClick={reset}>
-                  {t('withdraw.continueWithdraw')}
+                  {t("withdraw.continueWithdraw")}
                 </Button>
-                <Button className="flex-1" onClick={() => navigate('/')}>
-                  {t('common.goHome')}
+                <Button className="flex-1" onClick={() => navigate("/")}>
+                  {t("common.goHome")}
                 </Button>
               </div>
             </div>
@@ -149,13 +151,13 @@ function FiatWithdrawForm({
             <form
               onSubmit={handleSubmit}
               className={cn(
-                'space-y-4',
-                (prereq.disabled || bankList.length === 0) && 'cursor-not-allowed opacity-50 [&_*]:pointer-events-none',
+                "space-y-4",
+                (prereq.disabled || bankList.length === 0) && "cursor-not-allowed opacity-50 [&_*]:pointer-events-none",
               )}
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
                 <div className="flex-1 rounded-2xl border p-4">
-                  <p className="text-muted-foreground text-xs">{t('withdraw.amountYen')}</p>
+                  <p className="text-muted-foreground text-xs">{t("withdraw.amountYen")}</p>
                   <Input
                     type="number"
                     min={1}
@@ -165,25 +167,25 @@ function FiatWithdrawForm({
                     onChange={(e) => {
                       setAmount(e.target.value);
                     }}
-                    placeholder={t('withdraw.amountPlaceholder')}
+                    placeholder={t("withdraw.amountPlaceholder")}
                     className="mt-1"
                     required
                   />
                   <p className="text-muted-foreground mt-2 text-xs">
-                    {t('exchange.availableBalance')}: {formatCurrency(user.fiatBalance)}
+                    {t("exchange.availableBalance")}: {formatCurrency(user.fiatBalance)}
                   </p>
                   {amount && Number(amount) > user.fiatBalance && (
-                    <p className="text-destructive mt-1 text-xs">{t('common.insufficientBalance')}</p>
+                    <p className="text-destructive mt-1 text-xs">{t("common.insufficientBalance")}</p>
                   )}
                 </div>
                 <div className="flex items-center justify-center">
                   <ArrowRight className="text-muted-foreground h-5 w-5 rotate-90 sm:rotate-0" />
                 </div>
                 <div className="flex-1 rounded-2xl border p-4">
-                  <p className="text-muted-foreground text-xs">{t('withdraw.destinationAccount')}</p>
+                  <p className="text-muted-foreground text-xs">{t("withdraw.destinationAccount")}</p>
                   <Select value={selectedBank || undefined} onValueChange={setSelectedBank}>
                     <SelectTrigger className="mt-1 w-full">
-                      <SelectValue placeholder={t('withdraw.destinationAccount')} />
+                      <SelectValue placeholder={t("withdraw.destinationAccount")} />
                     </SelectTrigger>
                     <SelectContent>
                       {bankList.map((b) => (
@@ -211,7 +213,7 @@ function FiatWithdrawForm({
                   Number(amount) > user.fiatBalance
                 }
               >
-                {loading ? t('common.processing') : t('withdraw.withdrawButton')}
+                {loading ? t("common.processing") : t("withdraw.withdrawButton")}
               </Button>
             </form>
           )}
@@ -236,10 +238,10 @@ function XrpWithdrawForm({ prereq }: { prereq: { needsKyc: boolean; needsMfa: bo
   const { tokens, address, trustlines } = useAuthContext();
   const { t } = useI18n();
   const [xrpList, setXrpList] = useState<WhitelistAddress[]>([]);
-  const [selectedAddress, setSelectedAddress] = useState('');
-  const [tokenId, setTokenId] = useState('');
-  const [tokenAmount, setTokenAmount] = useState('');
-  const [error, setError] = useState('');
+  const [selectedAddress, setSelectedAddress] = useState("");
+  const [tokenId, setTokenId] = useState("");
+  const [tokenAmount, setTokenAmount] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [operationMfaOpen, setOperationMfaOpen] = useState(false);
   const [listLoading, setListLoading] = useState(true);
@@ -255,9 +257,10 @@ function XrpWithdrawForm({ prereq }: { prereq: { needsKyc: boolean; needsMfa: bo
     getXrpWhitelist()
       .then((list) => {
         setXrpList(list);
-        if (list.length > 0) setSelectedAddress(list[0].address);
+        const first = list[0];
+        if (first) setSelectedAddress(first.address);
       })
-      .catch(() => {})
+      .catch(noop)
       .finally(() => {
         setListLoading(false);
       });
@@ -267,14 +270,14 @@ function XrpWithdrawForm({ prereq }: { prereq: { needsKyc: boolean; needsMfa: bo
         .then(({ balances }) => {
           setBalanceMap(new Map(balances.map((b) => [`${b.currency}:${b.issuer}`, Number(b.value)])));
         })
-        .catch(() => {});
+        .catch(noop);
     }
   }, [address]);
 
   const selectedBalance = balances.find((b) => b.tokenId === tokenId);
 
   async function submitWithdraw() {
-    setError('');
+    setError("");
     setLoading(true);
     try {
       const res = await withdrawXrp({
@@ -287,7 +290,7 @@ function XrpWithdrawForm({ prereq }: { prereq: { needsKyc: boolean; needsMfa: bo
       if (err instanceof OperationMfaRequiredError) {
         setOperationMfaOpen(true);
       } else {
-        setError(err instanceof Error ? err.message : t('withdraw.xrpError'));
+        setError(err instanceof Error ? err.message : t("withdraw.xrpError"));
       }
     } finally {
       setLoading(false);
@@ -301,11 +304,11 @@ function XrpWithdrawForm({ prereq }: { prereq: { needsKyc: boolean; needsMfa: bo
 
   function reset() {
     setResult(null);
-    setTokenAmount('');
-    setError('');
+    setTokenAmount("");
+    setError("");
   }
 
-  if (listLoading) return <p className="text-muted-foreground py-6 text-center">{t('common.loading')}</p>;
+  if (listLoading) return <p className="text-muted-foreground py-6 text-center">{t("common.loading")}</p>;
 
   return (
     <>
@@ -313,7 +316,7 @@ function XrpWithdrawForm({ prereq }: { prereq: { needsKyc: boolean; needsMfa: bo
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <ArrowRight className="h-4 w-4 text-rose-600" />
-            {t('withdraw.xrpTitle')}
+            {t("withdraw.xrpTitle")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -323,18 +326,18 @@ function XrpWithdrawForm({ prereq }: { prereq: { needsKyc: boolean; needsMfa: bo
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <Shield className="h-5 w-5 text-amber-600" />
-                  <p className="text-sm font-medium">{t('withdraw.noXrpWhitelistTitle')}</p>
+                  <p className="text-sm font-medium">{t("withdraw.noXrpWhitelistTitle")}</p>
                 </div>
-                <p className="text-muted-foreground text-sm">{t('withdraw.noXrpWhitelist')}</p>
+                <p className="text-muted-foreground text-sm">{t("withdraw.noXrpWhitelist")}</p>
               </div>
-              <Button variant="outline" size="sm" className="shrink-0" onClick={() => navigate('/whitelist')}>
-                {t('common.goToWhitelist')}
+              <Button variant="outline" size="sm" className="shrink-0" onClick={() => navigate("/whitelist")}>
+                {t("common.goToWhitelist")}
               </Button>
             </div>
           )}
           {result ? (
             <div className="space-y-4 text-center">
-              <p className="text-muted-foreground text-sm">{t('withdraw.fiatCompleted')}</p>
+              <p className="text-muted-foreground text-sm">{t("withdraw.fiatCompleted")}</p>
               {result.xrplTxHash && (
                 <a
                   href={explorerTxUrl(result.xrplTxHash)}
@@ -348,10 +351,10 @@ function XrpWithdrawForm({ prereq }: { prereq: { needsKyc: boolean; needsMfa: bo
               )}
               <div className="flex gap-2">
                 <Button variant="outline" className="flex-1" onClick={reset}>
-                  {t('withdraw.continueWithdraw')}
+                  {t("withdraw.continueWithdraw")}
                 </Button>
-                <Button className="flex-1" onClick={() => navigate('/')}>
-                  {t('common.goHome')}
+                <Button className="flex-1" onClick={() => navigate("/")}>
+                  {t("common.goHome")}
                 </Button>
               </div>
             </div>
@@ -359,16 +362,16 @@ function XrpWithdrawForm({ prereq }: { prereq: { needsKyc: boolean; needsMfa: bo
             <form
               onSubmit={handleSubmit}
               className={cn(
-                'space-y-4',
-                (prereq.disabled || xrpList.length === 0) && 'cursor-not-allowed opacity-50 [&_*]:pointer-events-none',
+                "space-y-4",
+                (prereq.disabled || xrpList.length === 0) && "cursor-not-allowed opacity-50 [&_*]:pointer-events-none",
               )}
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
                 <div className="flex-1 rounded-2xl border p-4">
-                  <p className="text-muted-foreground text-xs">{t('withdraw.tokenLabel')}</p>
+                  <p className="text-muted-foreground text-xs">{t("withdraw.tokenLabel")}</p>
                   <Select value={tokenId || undefined} onValueChange={setTokenId}>
                     <SelectTrigger className="mt-1 w-full">
-                      <SelectValue placeholder={t('withdraw.tokenSelect')} />
+                      <SelectValue placeholder={t("withdraw.tokenSelect")} />
                     </SelectTrigger>
                     <SelectContent>
                       {tokens.map((tk) => (
@@ -378,7 +381,7 @@ function XrpWithdrawForm({ prereq }: { prereq: { needsKyc: boolean; needsMfa: bo
                       ))}
                     </SelectContent>
                   </Select>
-                  <p className="text-muted-foreground mt-3 text-xs">{t('withdraw.tokenAmount')}</p>
+                  <p className="text-muted-foreground mt-3 text-xs">{t("withdraw.tokenAmount")}</p>
                   <Input
                     type="number"
                     min={1}
@@ -388,28 +391,28 @@ function XrpWithdrawForm({ prereq }: { prereq: { needsKyc: boolean; needsMfa: bo
                     onChange={(e) => {
                       setTokenAmount(e.target.value);
                     }}
-                    placeholder={t('withdraw.quantityPlaceholder')}
+                    placeholder={t("withdraw.quantityPlaceholder")}
                     className="mt-1"
                     required
                   />
                   <p className="text-muted-foreground mt-2 text-xs">
-                    {t('exchange.availableBalance')}:{' '}
+                    {t("exchange.availableBalance")}:{" "}
                     {tokenId && selectedBalance
-                      ? `${formatTokenAmount(selectedBalance.balance)} ${tokens.find((tk) => tk.tokenId === tokenId)?.currency ?? ''}`
-                      : '--'}
+                      ? `${formatTokenAmount(selectedBalance.balance)} ${tokens.find((tk) => tk.tokenId === tokenId)?.currency ?? ""}`
+                      : "--"}
                   </p>
                   {tokenAmount && selectedBalance && Number(tokenAmount) > selectedBalance.balance && (
-                    <p className="text-destructive mt-1 text-xs">{t('common.insufficientBalance')}</p>
+                    <p className="text-destructive mt-1 text-xs">{t("common.insufficientBalance")}</p>
                   )}
                 </div>
                 <div className="flex items-center justify-center">
                   <ArrowRight className="text-muted-foreground h-5 w-5 rotate-90 sm:rotate-0" />
                 </div>
                 <div className="flex-1 rounded-2xl border p-4">
-                  <p className="text-muted-foreground text-xs">{t('withdraw.destinationAddress')}</p>
+                  <p className="text-muted-foreground text-xs">{t("withdraw.destinationAddress")}</p>
                   <Select value={selectedAddress || undefined} onValueChange={setSelectedAddress}>
                     <SelectTrigger className="mt-1 w-full">
-                      <SelectValue placeholder={t('withdraw.destinationAddress')} />
+                      <SelectValue placeholder={t("withdraw.destinationAddress")} />
                     </SelectTrigger>
                     <SelectContent>
                       {xrpList.map((item) => (
@@ -435,7 +438,7 @@ function XrpWithdrawForm({ prereq }: { prereq: { needsKyc: boolean; needsMfa: bo
                   (selectedBalance != null && Number(tokenAmount) > selectedBalance.balance)
                 }
               >
-                {loading ? t('common.processing') : t('withdraw.withdrawButton')}
+                {loading ? t("common.processing") : t("withdraw.withdrawButton")}
               </Button>
             </form>
           )}
@@ -464,10 +467,10 @@ export function WithdrawPage() {
       <Tabs defaultValue="fiat">
         <TabsList className="w-full">
           <TabsTrigger value="fiat" className="flex-1">
-            {t('withdraw.fiatTitle')}
+            {t("withdraw.fiatTitle")}
           </TabsTrigger>
           <TabsTrigger value="xrp" className="flex-1">
-            {t('withdraw.xrpTitle')}
+            {t("withdraw.xrpTitle")}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="fiat">

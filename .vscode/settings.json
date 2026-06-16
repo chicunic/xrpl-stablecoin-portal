@@ -6,6 +6,9 @@
     "source.fixAll.eslint": "explicit",
     "source.fixAll.tailwindCSS": "explicit"
   },
+  "[yaml]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
 
   // Tailwind CSS IntelliSense
   "tailwindCSS.includeLanguages": {

@@ -1,72 +1,72 @@
 import {
   GoogleAuthProvider,
-  getMultiFactorResolver,
   type MultiFactorError,
   type MultiFactorResolver,
+  TotpMultiFactorGenerator,
+  type TotpSecret,
+  type User,
+  getMultiFactorResolver,
   multiFactor,
   onAuthStateChanged,
   reauthenticateWithPopup,
   signInWithPopup,
   signOut,
-  TotpMultiFactorGenerator,
-  type TotpSecret,
-  type User,
-} from 'firebase/auth';
+} from "firebase/auth";
 import {
+  type ReactNode,
   createContext,
   createElement,
-  type ReactNode,
   useCallback,
   useContext,
   useEffect,
   useMemo,
   useState,
-} from 'react';
-import { auth } from './firebase';
+} from "react";
+import { auth } from "./firebase";
 
-const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? '';
+const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? "";
 
 function getCookie(name: string): string | null {
-  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
-  return match ? decodeURIComponent(match[1]) : null;
+  const match = new RegExp(`(?:^|; )${name}=([^;]*)`).exec(document.cookie);
+  return match ? decodeURIComponent(match[1] ?? "") : null;
 }
 
 function setCookie(name: string, value: string, maxAgeSec: number): void {
   void cookieStore.set({
     name,
     value: encodeURIComponent(value),
-    path: '/',
+    path: "/",
     expires: Date.now() + maxAgeSec * 1000,
-    sameSite: 'lax',
+    sameSite: "lax",
   });
 }
 
 function deleteCookie(name: string): void {
-  void cookieStore.delete({ name, path: '/' });
+  void cookieStore.delete({ name, path: "/" });
 }
 
 const SESSION_MAX_AGE = 24 * 60 * 60; // 1 day
 
 export function getSessionToken(): string | null {
-  return getCookie('token');
+  return getCookie("token");
 }
 
 export function setSessionToken(token: string | null): void {
   if (token) {
-    setCookie('token', token, SESSION_MAX_AGE);
+    setCookie("token", token, SESSION_MAX_AGE);
   } else {
-    deleteCookie('token');
+    deleteCookie("token");
   }
 }
 
 async function createSession(idToken: string): Promise<void> {
   const res = await fetch(`${API_BASE}/api/v1/session/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ idToken }),
   });
   if (!res.ok) {
-    const body = (await res.json().catch(() => ({ error: 'Unknown error' }))) as { error?: string };
+    const body = (await res.json().catch(() => ({ error: "Unknown error" }))) as { error?: string };
     throw new Error(body.error ?? `Session login failed: HTTP ${String(res.status)}`);
   }
   const data = (await res.json()) as { sessionToken: string };
@@ -74,7 +74,7 @@ async function createSession(idToken: string): Promise<void> {
 }
 
 function destroySession(): void {
-  deleteCookie('token');
+  deleteCookie("token");
 }
 
 /* ------------------------------------------------------------------ */
@@ -109,7 +109,7 @@ const AuthContext = createContext<AuthState | null>(null);
 
 export function useAuth(): AuthState {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
 }
 
@@ -130,7 +130,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const idToken = await u.getIdToken();
           await createSession(idToken);
         } catch (err) {
-          console.error('Failed to create session:', err);
+          console.error("Failed to create session:", err);
         }
       } else {
         destroySession();
@@ -146,7 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await signInWithPopup(auth, new GoogleAuthProvider());
     } catch (err: unknown) {
       const e = err as { code?: string };
-      if (e.code === 'auth/multi-factor-auth-required') {
+      if (e.code === "auth/multi-factor-auth-required") {
         const resolver = getMultiFactorResolver(auth, err as MultiFactorError);
         setMfaResolver(resolver);
         return;
@@ -157,9 +157,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const verifyMfaCode = useCallback(
     async (code: string) => {
-      if (!mfaResolver) throw new Error('No MFA resolver');
+      if (!mfaResolver) throw new Error("No MFA resolver");
       const totpHint = mfaResolver.hints.find((h) => h.factorId === TotpMultiFactorGenerator.FACTOR_ID);
-      if (!totpHint) throw new Error('No TOTP hint found');
+      if (!totpHint) throw new Error("No TOTP hint found");
       const assertion = TotpMultiFactorGenerator.assertionForSignIn(totpHint.uid, code);
       await mfaResolver.resolveSignIn(assertion);
       setMfaResolver(null);
@@ -174,7 +174,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const startTotpEnrollment = useCallback(async () => {
-    if (!auth.currentUser) throw new Error('Not signed in');
+    if (!auth.currentUser) throw new Error("Not signed in");
     const doEnroll = async () => {
       const session = await multiFactor(auth.currentUser!).getSession();
       return TotpMultiFactorGenerator.generateSecret(session);
@@ -183,7 +183,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return await doEnroll();
     } catch (err: unknown) {
       const e = err as { code?: string };
-      if (e.code === 'auth/requires-recent-login') {
+      if (e.code === "auth/requires-recent-login") {
         await reauthenticateWithPopup(auth.currentUser, new GoogleAuthProvider());
         return await doEnroll();
       }
@@ -192,15 +192,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const finalizeTotpEnrollment = useCallback(async (secret: TotpSecret, code: string) => {
-    if (!auth.currentUser) throw new Error('Not signed in');
+    if (!auth.currentUser) throw new Error("Not signed in");
     const assertion = TotpMultiFactorGenerator.assertionForEnrollment(secret, code);
     try {
-      await multiFactor(auth.currentUser).enroll(assertion, 'TOTP');
+      await multiFactor(auth.currentUser).enroll(assertion, "TOTP");
     } catch (err: unknown) {
       const e = err as { code?: string };
-      if (e.code === 'auth/requires-recent-login') {
+      if (e.code === "auth/requires-recent-login") {
         await reauthenticateWithPopup(auth.currentUser, new GoogleAuthProvider());
-        await multiFactor(auth.currentUser).enroll(assertion, 'TOTP');
+        await multiFactor(auth.currentUser).enroll(assertion, "TOTP");
       } else {
         throw err;
       }

@@ -1,16 +1,16 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { AuthLayout } from '@/components/AuthLayout';
-import { I18nProvider } from '@/i18n';
-import { AuthProvider } from '@/lib/auth';
-import { DashboardPage } from '@/pages/DashboardPage';
-import { DepositPage } from '@/pages/DepositPage';
-import { ExchangePage } from '@/pages/ExchangePage';
-import { InvoicePage } from '@/pages/InvoicePage';
-import { LoginPage } from '@/pages/LoginPage';
-import { OrdersPage } from '@/pages/OrdersPage';
-import { SettingsPage } from '@/pages/SettingsPage';
-import { WhitelistPage } from '@/pages/WhitelistPage';
-import { WithdrawPage } from '@/pages/WithdrawPage';
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { AuthLayout } from "@/components/AuthLayout";
+import { I18nProvider } from "@/i18n";
+import { AuthProvider } from "@/lib/auth";
+import { DashboardPage } from "@/pages/DashboardPage";
+import { DepositPage } from "@/pages/DepositPage";
+import { ExchangePage } from "@/pages/ExchangePage";
+import { InvoicePage } from "@/pages/InvoicePage";
+import { LoginPage } from "@/pages/LoginPage";
+import { OrdersPage } from "@/pages/OrdersPage";
+import { SettingsPage } from "@/pages/SettingsPage";
+import { WhitelistPage } from "@/pages/WhitelistPage";
+import { WithdrawPage } from "@/pages/WithdrawPage";
 
 function App() {
   return (

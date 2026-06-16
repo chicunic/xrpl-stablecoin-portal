@@ -5,7 +5,7 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=24"
+    "node": ">=26"
   },
   "scripts": {
     "dev": "pnpm -r --parallel dev",
@@ -16,45 +16,46 @@
     "build:bank": "pnpm -F @xrpl-stablecoin-portal/bank build",
     "preview:token": "pnpm -F @xrpl-stablecoin-portal/token preview",
     "preview:bank": "pnpm -F @xrpl-stablecoin-portal/bank preview",
-    "check": "pnpm -r --parallel exec tsc --noEmit && eslint && prettier --check 'sites/*/src/**/*.{ts,tsx,css}' 'packages/*/src/**/*.ts' 'sites/*/vite.config.ts' '*.json' 'cloudbuild.yaml' 'pnpm-workspace.yaml' 'sites/*/*.html' 'sites/*/*.json' 'eslint.config.js'",
-    "fix": "eslint --fix && prettier --write 'sites/*/src/**/*.{ts,tsx,css}' 'packages/*/src/**/*.ts' 'sites/*/vite.config.ts' '*.json' 'cloudbuild.yaml' 'pnpm-workspace.yaml' 'sites/*/*.html' 'sites/*/*.json' 'eslint.config.js'",
+    "check": "pnpm -r --parallel exec tsc --noEmit && eslint && prettier --check .",
+    "fix": "eslint --fix && prettier --write .",
     "clean": "pnpm -r exec rm -rf dist node_modules/.vite",
     "prepare": "husky"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "firebase": "^12.12.0",
+    "firebase": "^12.14.0",
     "input-otp": "^1.4.2",
-    "lucide-react": "^1.8.0",
+    "lucide-react": "^1.18.0",
     "qrcode.react": "^4.2.0",
-    "radix-ui": "^1.4.3",
-    "react": "^19.2.5",
-    "react-dom": "^19.2.5",
-    "react-router-dom": "^7.14.1",
-    "ripple-address-codec": "^5.0.0",
-    "tailwind-merge": "^3.5.0"
+    "radix-ui": "^1.6.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^7.17.0",
+    "ripple-address-codec": "^5.0.1",
+    "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@tailwindcss/vite": "^4.2.2",
-    "@types/node": "^25.6.0",
-    "@types/react": "^19.2.14",
+    "@tailwindcss/vite": "^4.3.1",
+    "@types/node": "^25.9.3",
+    "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.1",
-    "eslint": "^10.2.0",
+    "@vitejs/plugin-react": "^6.0.2",
+    "eslint": "^10.5.0",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-react-hooks": "^7.0.1",
-    "eslint-plugin-react-refresh": "^0.5.2",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.3",
     "husky": "^9.1.7",
-    "prettier": "^3.8.3",
-    "prettier-plugin-tailwindcss": "^0.7.2",
-    "shadcn": "^4.2.0",
-    "tailwindcss": "^4.2.2",
+    "jiti": "^2.7.0",
+    "prettier": "^3.8.4",
+    "prettier-plugin-tailwindcss": "^0.8.0",
+    "shadcn": "^4.11.0",
+    "tailwindcss": "^4.3.1",
     "tw-animate-css": "^1.4.0",
-    "typescript": "~6.0.2",
-    "typescript-eslint": "^8.58.2",
-    "vite": "^8.0.8"
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.61.1",
+    "vite": "^8.0.16"
   },
-  "packageManager": "pnpm@10.33.0+sha512.10568bb4a6afb58c9eb3630da90cc9516417abebd3fabbe6739f0ae795728da1491e9db5a544c76ad8eb7570f5c4bb3d6c637b2cb41bfdcdb47fa823c8649319"
+  "packageManager": "pnpm@11.7.0+sha512.19cc852c120c7125760f2443ee6be0ca5b40f9f50598de1a09a1f177503e010e57c23c77646e01e761de59bf874fb22a3398c33ab9691fc13eb946b6f0f4d620"
 }
