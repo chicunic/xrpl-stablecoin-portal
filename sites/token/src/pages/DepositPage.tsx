@@ -3,7 +3,7 @@ import { Banknote, Copy, Link, QrCode, Wallet } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { TrustLineDialog } from "@/components/TrustLineDialog";
+import { AuthorizeDialog } from "@/components/AuthorizeDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -126,15 +126,15 @@ function FiatDepositTab() {
 }
 
 function XrpDepositTab() {
-  const { address, tokens, trustlines, refreshTrustlines } = useAuthContext();
+  const { address, tokens, authorizations, refreshAuthorizations } = useAuthContext();
   const { t } = useI18n();
   const navigate = useNavigate();
   const [tokenId, setTokenId] = useState("");
   const [trustDialogOpen, setTrustDialogOpen] = useState(false);
   const [, setCopied] = useState(false);
 
-  const selectedTrustline = trustlines.find((b) => b.tokenId === tokenId);
-  const hasTrustline = selectedTrustline?.hasTrustline ?? false;
+  const selectedAuthorization = authorizations.find((b) => b.tokenId === tokenId);
+  const hasAuthorization = selectedAuthorization?.hasAuthorization ?? false;
 
   function handleCopy() {
     void navigator.clipboard.writeText(address);
@@ -184,21 +184,21 @@ function XrpDepositTab() {
                 <SelectContent>
                   {tokens.map((tk) => (
                     <SelectItem key={tk.tokenId} value={tk.tokenId}>
-                      {tk.currency} - {tk.issuerAddress}
+                      {tk.name} - {tk.issuerAddress}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
-            {tokenId && !hasTrustline && (
+            {tokenId && !hasAuthorization && (
               <div className="flex items-center justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <Link className="h-5 w-5 text-amber-600" />
-                    <p className="text-sm font-medium">{t("deposit.trustLineTitle")}</p>
+                    <p className="text-sm font-medium">{t("deposit.authorizeTitle")}</p>
                   </div>
-                  <p className="text-muted-foreground text-sm">{t("deposit.trustLineWarning")}</p>
+                  <p className="text-muted-foreground text-sm">{t("deposit.authorizeWarning")}</p>
                 </div>
                 <Button
                   variant="outline"
@@ -208,16 +208,16 @@ function XrpDepositTab() {
                   }}
                   className="shrink-0"
                 >
-                  {t("deposit.trustLineSet")}
+                  {t("deposit.authorize")}
                 </Button>
               </div>
             )}
 
-            <TrustLineDialog
+            <AuthorizeDialog
               tokenId={tokenId}
               open={trustDialogOpen}
               onOpenChange={setTrustDialogOpen}
-              onSuccess={refreshTrustlines}
+              onSuccess={refreshAuthorizations}
             />
 
             <p className="text-muted-foreground text-sm">{t("deposit.xrpSendDescription")}</p>

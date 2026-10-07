@@ -1,4 +1,5 @@
 import { defineConfig } from "eslint/config";
+import type { ESLint } from "eslint";
 import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
 import reactHooks from "eslint-plugin-react-hooks";
@@ -21,7 +22,7 @@ export default defineConfig(
       },
     },
     plugins: {
-      "react-hooks": reactHooks,
+      "react-hooks": reactHooks as ESLint.Plugin,
       "react-refresh": reactRefresh,
     },
     rules: {

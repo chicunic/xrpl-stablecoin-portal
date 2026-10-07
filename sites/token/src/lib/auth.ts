@@ -66,8 +66,8 @@ async function createSession(idToken: string): Promise<void> {
     body: JSON.stringify({ idToken }),
   });
   if (!res.ok) {
-    const body = (await res.json().catch(() => ({ error: "Unknown error" }))) as { error?: string };
-    throw new Error(body.error ?? `Session login failed: HTTP ${String(res.status)}`);
+    const body = (await res.json().catch(() => ({ detail: "Unknown error" }))) as { detail?: string; title?: string };
+    throw new Error(body.detail ?? body.title ?? `Session login failed: HTTP ${String(res.status)}`);
   }
   const data = (await res.json()) as { sessionToken: string };
   setSessionToken(data.sessionToken);
@@ -121,7 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | undefined | null>(undefined);
   const [loading, setLoading] = useState(true);
   const [mfaResolver, setMfaResolver] = useState<MultiFactorResolver | null>(null);
-  const [mfaVersion, setMfaVersion] = useState(0);
+  const [, setMfaVersion] = useState(0);
 
   useEffect(() => {
     return onAuthStateChanged(auth, async (u) => {
@@ -208,11 +208,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setMfaVersion((v) => v + 1);
   }, []);
 
-  const hasTotpMfa = useMemo(() => {
-    void mfaVersion;
-    if (!user) return false;
-    return multiFactor(user).enrolledFactors.some((f) => f.factorId === TotpMultiFactorGenerator.FACTOR_ID);
-  }, [user, mfaVersion]);
+  const hasTotpMfa = user
+    ? multiFactor(user).enrolledFactors.some((f) => f.factorId === TotpMultiFactorGenerator.FACTOR_ID)
+    : false;
 
   const value = useMemo<AuthState>(
     () => ({

@@ -6,13 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useI18n } from "@/i18n";
-import { getFiatTransactions, getXrpTransactions } from "@/lib/api";
-import { formatCurrency, formatDate, formatTokenAmount, isIncomeType, txTypeLabel } from "@/lib/format";
-import type { FiatTransaction, TransactionType, XrpTransaction } from "@/lib/types";
+import { getFiatTransactions, getMptTransactions } from "@/lib/api";
+import { formatCurrency, formatDate, formatMptAmount, isIncomeType, txTypeLabel } from "@/lib/format";
+import type { FiatTransaction, FiatTransactionType, MptTransaction, MptTransactionType } from "@/lib/types";
 import { useAuthContext } from "@/lib/useAuthContext";
 import { explorerTxUrl } from "@/lib/xrpl";
 
-function txBadgeClass(type: TransactionType): string {
+function txBadgeClass(type: FiatTransactionType | MptTransactionType): string {
   if (isIncomeType(type)) return "bg-green-100 text-green-700";
   return "bg-amber-100 text-amber-700";
 }
@@ -20,13 +20,14 @@ function txBadgeClass(type: TransactionType): string {
 function XrpTransactionsTab() {
   const { t } = useI18n();
   const { tokens } = useAuthContext();
-  const [transactions, setTransactions] = useState<XrpTransaction[]>([]);
+  const [transactions, setTransactions] = useState<MptTransaction[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const currencyMap = useMemo(() => new Map(tokens.map((tk) => [tk.tokenId, tk.currency])), [tokens]);
+  const currencyMap = useMemo(() => new Map(tokens.map((tk) => [tk.tokenId, tk.name])), [tokens]);
+  const scaleMap = useMemo(() => new Map(tokens.map((tk) => [tk.tokenId, tk.assetScale])), [tokens]);
 
   useEffect(() => {
-    getXrpTransactions()
+    getMptTransactions()
       .then(setTransactions)
       .catch(noop)
       .finally(() => {
@@ -77,7 +78,7 @@ function XrpTransactionsTab() {
                       }`}
                     >
                       {isIncomeType(tx.type) ? "+" : "-"}
-                      {formatTokenAmount(tx.amount)} {currencyMap.get(tx.tokenId) ?? ""}
+                      {formatMptAmount(tx.amount, scaleMap.get(tx.tokenId) ?? 0)} {currencyMap.get(tx.tokenId) ?? ""}
                     </span>
                   </div>
                 </div>
@@ -113,7 +114,8 @@ function XrpTransactionsTab() {
                           }`}
                         >
                           {isIncomeType(tx.type) ? "+" : "-"}
-                          {formatTokenAmount(tx.amount)} {currencyMap.get(tx.tokenId) ?? ""}
+                          {formatMptAmount(tx.amount, scaleMap.get(tx.tokenId) ?? 0)}{" "}
+                          {currencyMap.get(tx.tokenId) ?? ""}
                         </span>
                       </TableCell>
                       <TableCell>

@@ -9,17 +9,17 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useI18n } from "@/i18n";
-import { ensureTrustLine } from "@/lib/api";
+import { authorizeToken } from "@/lib/api";
 import { useAuthContext } from "@/lib/useAuthContext";
 
-interface TrustLineDialogProps {
+interface AuthorizeDialogProps {
   tokenId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
 }
 
-export function TrustLineDialog({ tokenId, open, onOpenChange, onSuccess }: TrustLineDialogProps) {
+export function AuthorizeDialog({ tokenId, open, onOpenChange, onSuccess }: AuthorizeDialogProps) {
   const { t } = useI18n();
   const { address, tokens } = useAuthContext();
   const [loading, setLoading] = useState(false);
@@ -27,15 +27,15 @@ export function TrustLineDialog({ tokenId, open, onOpenChange, onSuccess }: Trus
 
   const token = tokens.find((tk) => tk.tokenId === tokenId);
 
-  async function handleSetTrustline() {
+  async function handleAuthorize() {
     setError("");
     setLoading(true);
     try {
-      await ensureTrustLine(tokenId);
+      await authorizeToken(tokenId);
       onSuccess();
       onOpenChange(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("deposit.trustLineError"));
+      setError(err instanceof Error ? err.message : t("deposit.authorizeError"));
     } finally {
       setLoading(false);
     }
@@ -50,22 +50,22 @@ export function TrustLineDialog({ tokenId, open, onOpenChange, onSuccess }: Trus
     >
       <DialogContent showCloseButton={!loading}>
         <DialogHeader>
-          <DialogTitle>{t("deposit.trustLineSet")}</DialogTitle>
-          <DialogDescription>{t("deposit.trustLineWarning")}</DialogDescription>
+          <DialogTitle>{t("deposit.authorize")}</DialogTitle>
+          <DialogDescription>{t("deposit.authorizeWarning")}</DialogDescription>
         </DialogHeader>
 
         {token && (
           <div className="space-y-3 rounded-2xl border p-3 text-sm">
             <div>
-              <p className="text-muted-foreground">{t("trustline.account")}</p>
+              <p className="text-muted-foreground">{t("authorization.account")}</p>
               <p className="truncate font-mono text-xs">{address}</p>
             </div>
             <div>
-              <p className="text-muted-foreground">{t("trustline.currency")}</p>
-              <p className="font-medium">{token.currency}</p>
+              <p className="text-muted-foreground">{t("authorization.token")}</p>
+              <p className="font-medium">{token.name}</p>
             </div>
             <div>
-              <p className="text-muted-foreground">{t("trustline.issuer")}</p>
+              <p className="text-muted-foreground">{t("authorization.issuer")}</p>
               <p className="truncate font-mono text-xs">{token.issuerAddress}</p>
             </div>
           </div>
@@ -83,8 +83,8 @@ export function TrustLineDialog({ tokenId, open, onOpenChange, onSuccess }: Trus
           >
             {t("common.cancel")}
           </Button>
-          <Button onClick={handleSetTrustline} disabled={loading}>
-            {loading ? t("common.setting") : t("deposit.trustLineSet")}
+          <Button onClick={handleAuthorize} disabled={loading}>
+            {loading ? t("common.setting") : t("deposit.authorize")}
           </Button>
         </DialogFooter>
       </DialogContent>

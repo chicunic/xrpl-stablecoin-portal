@@ -1,3 +1,4 @@
+import { Landmark } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -23,7 +24,7 @@ export function Header({ accountHolder }: { accountHolder?: string }) {
           onClick={handleHome}
           className="flex items-center gap-2 transition-opacity hover:opacity-70 sm:gap-3"
         >
-          <img src="/logo-full.svg" alt="NexBridge" className="h-7 sm:h-8" />
+          <Landmark className="text-primary h-7 w-7 sm:h-8 sm:w-8" />
           <Separator orientation="vertical" className="hidden h-5 sm:block" />
           <span className="text-muted-foreground hidden text-sm sm:inline">インターネットバンキング</span>
         </button>

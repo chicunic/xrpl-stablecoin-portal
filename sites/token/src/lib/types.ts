@@ -1,4 +1,6 @@
-export type TransactionType = "deposit" | "withdrawal" | "exchange_in" | "exchange_out" | "refund" | "invoice_payment";
+export type FiatTransactionType = "deposit" | "withdrawal" | "exchange_in" | "exchange_out" | "refund";
+
+export type MptTransactionType = "deposit" | "withdrawal" | "exchange_in" | "exchange_out" | "invoice_payment";
 
 export interface MfaVerifyResult {
   status: string;
@@ -60,9 +62,6 @@ export interface VirtualAccount {
 export interface WhitelistAddress {
   address: string;
   label: string;
-  recipientName: string;
-  relationship: string;
-  purpose: string;
   createdAt: string;
 }
 
@@ -88,24 +87,30 @@ export interface KycInfo {
   address: string;
   status: "none" | "approved";
   submittedAt: string;
+  credentialTxHash?: string;
+  credentialAcceptTxHash?: string;
+  credentialStatus?: "issued" | "accepted" | "failed";
 }
 
 export interface Token {
   tokenId: string;
   name: string;
-  currency: string;
   domain: string;
   issuerAddress: string;
-  createdAt: string;
+  mptIssuanceId: string;
+  assetScale: number;
+  maximumAmount: string;
+  transferFee: number;
+  permissionedDomainId?: string;
 }
 
 export interface FiatTransaction {
   transactionId: string;
-  type: TransactionType;
+  type: FiatTransactionType;
   amount: number;
   balance: number;
   description: string;
-  relatedOrderId: string;
+  relatedOrderId?: string;
   createdAt: string;
 }
 
@@ -116,8 +121,8 @@ export interface ExchangeOrder {
   direction: "fiat_to_token" | "token_to_fiat";
   amount: number;
   status: "pending" | "fiat_debited" | "token_burned" | "completed" | "failed";
-  xrplTxHash: string;
-  failureReason: string;
+  xrplTxHash?: string;
+  failureReason?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -133,34 +138,45 @@ export interface FiatWithdrawalResult {
   txReference: string;
 }
 
-export interface XrpWithdrawalResult {
+export interface MptWithdrawalResult {
   tokenId: string;
   amount: number;
   destinationAddress: string;
   xrplTxHash: string;
 }
 
-export interface XrpBalance {
-  currency: string;
+export interface MptBalance {
+  mptIssuanceId: string;
   value: string;
-  issuer: string;
 }
 
-export interface XrpTransaction {
+export interface MptTransaction {
   transactionId: string;
   tokenId: string;
-  type: TransactionType;
+  type: MptTransactionType;
   amount: number;
   description: string;
-  relatedOrderId: string;
+  relatedOrderId?: string;
   txHash?: string;
   createdAt: string;
 }
 
-export interface TrustlineInfo {
+export interface TokenAuthorizationStatus {
   tokenId: string;
   name: string;
-  currency: string;
   issuerAddress: string;
-  hasTrustline: boolean;
+  mptIssuanceId: string;
+  hasAuthorization: boolean;
+}
+
+export interface CredentialStatus {
+  exists: boolean;
+  accepted: boolean;
+  expiration?: number;
+}
+
+export interface CredentialAcceptResult {
+  credentialTxHash: string;
+  credentialAcceptTxHash: string;
+  credentialStatus: "accepted";
 }

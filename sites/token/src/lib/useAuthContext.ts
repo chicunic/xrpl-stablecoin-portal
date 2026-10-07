@@ -1,5 +1,5 @@
 import { useOutletContext } from "react-router-dom";
-import type { Token, TrustlineInfo, User, VirtualAccount } from "@/lib/types";
+import type { Token, TokenAuthorizationStatus, User, VirtualAccount } from "@/lib/types";
 
 interface AuthContext {
   user: User;
@@ -8,8 +8,8 @@ interface AuthContext {
   refreshAll: () => void;
   virtualAccount: VirtualAccount | null;
   setVirtualAccount: (va: VirtualAccount) => void;
-  trustlines: TrustlineInfo[];
-  refreshTrustlines: () => void;
+  authorizations: TokenAuthorizationStatus[];
+  refreshAuthorizations: () => void;
 }
 
 export function useAuthContext() {

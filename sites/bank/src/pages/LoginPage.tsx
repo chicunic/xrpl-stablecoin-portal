@@ -1,3 +1,4 @@
+import { Landmark } from "lucide-react";
 import { type SubmitEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
@@ -110,7 +111,7 @@ export function LoginPage() {
       <main className="flex flex-1 items-center justify-center px-4">
         <Card className="w-full max-w-sm">
           <CardHeader className="text-center">
-            <img src="/logo-full.svg" alt="NexBridge" className="mx-auto mb-2 h-10" />
+            <Landmark className="text-primary mx-auto mb-2 h-10 w-10" />
             <CardTitle className="text-xl">ログイン</CardTitle>
           </CardHeader>
           <CardContent>

@@ -6,7 +6,7 @@ export interface BankAccount {
   bankCode: string;
   branchCode: string;
   balance: number;
-  pubsubEnabled: boolean;
+  pubsubEnabled?: boolean;
   transactionSequence: number;
   createdAt: string;
   updatedAt: string;
@@ -28,15 +28,17 @@ export interface BankTransaction {
   counterparty: Counterparty | null;
   sequenceNumber: number;
   description: string;
-  virtualAccountNumber: string;
-  virtualAccountLabel: string;
+  virtualAccountNumber?: string;
+  virtualAccountLabel?: string;
   createdAt: string;
 }
 
 export interface BankVirtualAccount {
   virtualAccountId: string;
   accountNumber: string;
+  bankCode: string;
   branchCode: string;
+  accountHolder: string;
   parentAccountId: string;
   parentAccountNumber: string;
   label: string;
@@ -45,6 +47,12 @@ export interface BankVirtualAccount {
   updatedAt: string;
 }
 
+/** RFC 9457 Problem Details — the backend's error response shape. */
 export interface ApiError {
-  error: string;
+  type?: string;
+  title?: string;
+  status?: number;
+  detail?: string;
+  instance?: string;
+  errors?: { path: string; message: string }[];
 }

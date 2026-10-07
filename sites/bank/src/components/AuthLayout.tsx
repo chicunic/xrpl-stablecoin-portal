@@ -94,7 +94,7 @@ export function AuthLayout() {
         <Outlet context={{ account, refreshAccount }} />
       </main>
       <footer className="text-muted-foreground hidden border-t bg-white py-4 text-center text-xs sm:block">
-        &copy; {new Date().getFullYear()} NexBridge All rights reserved.
+        &copy; {new Date().getFullYear()} Chicunic All rights reserved.
       </footer>
       {/* Mobile bottom nav */}
       <nav className="fixed inset-x-0 bottom-0 z-50 border-t bg-white sm:hidden">

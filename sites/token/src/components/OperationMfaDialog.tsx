@@ -45,7 +45,7 @@ export function OperationMfaDialog({ open, onClose, onVerified }: OperationMfaDi
       setError("");
       setVerifying(true);
       try {
-        await verifyOperationMfa(code);
+        await verifyOperationMfa();
         reset();
         onVerified();
       } catch {

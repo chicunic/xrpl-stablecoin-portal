@@ -2,6 +2,8 @@ import { getSessionToken, setSessionToken } from "./auth";
 import { auth } from "./firebase";
 import type {
   BankAccount,
+  CredentialAcceptResult,
+  CredentialStatus,
   ExchangeOrder,
   FiatTransaction,
   FiatWithdrawalResult,
@@ -9,15 +11,15 @@ import type {
   InvoiceType,
   KycInfo,
   MfaVerifyResult,
+  MptBalance,
+  MptTransaction,
+  MptWithdrawalResult,
   ParsedInvoiceData,
   Token,
-  TrustlineInfo,
+  TokenAuthorizationStatus,
   User,
   VirtualAccount,
   WhitelistAddress,
-  XrpBalance,
-  XrpTransaction,
-  XrpWithdrawalResult,
 } from "./types";
 
 const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? "";
@@ -68,8 +70,8 @@ export async function refreshSession(): Promise<void> {
     body: JSON.stringify({ idToken }),
   });
   if (!res.ok) {
-    const body = (await res.json().catch(() => ({ error: "Unknown error" }))) as { error?: string };
-    throw new Error(body.error ?? `HTTP ${String(res.status)}`);
+    const body = (await res.json().catch(() => ({ detail: "Unknown error" }))) as ProblemDetails;
+    throw new Error(body.detail ?? body.title ?? `HTTP ${String(res.status)}`);
   }
   const data = (await res.json()) as { sessionToken: string };
   setSessionToken(data.sessionToken);
@@ -96,11 +98,21 @@ export class KycRequiredError extends Error {
   }
 }
 
-function throwIfForbidden(status: number, body: { code?: string; error?: string }): void {
+/** RFC 9457 Problem Details — the backend's error response shape. */
+interface ProblemDetails {
+  type?: string;
+  title?: string;
+  status?: number;
+  detail?: string;
+  instance?: string;
+  errors?: { path: string; message: string }[];
+}
+
+function throwIfForbidden(status: number, body: ProblemDetails): void {
   if (status !== 403) return;
-  if (body.code === "MFA_REQUIRED") throw new OperationMfaRequiredError();
-  if (body.error === "KYC required") throw new KycRequiredError();
-  if (body.error === "MFA required") throw new MfaRequiredError();
+  if (body.detail === "MFA verification required") throw new OperationMfaRequiredError();
+  if (body.detail === "KYC required") throw new KycRequiredError();
+  if (body.detail === "MFA required") throw new MfaRequiredError();
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -121,9 +133,9 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     setMfaToken(null);
   }
   if (!res.ok) {
-    const body = (await res.json().catch(() => ({ error: "Unknown error" }))) as { code?: string; error?: string };
+    const body = (await res.json().catch(() => ({ detail: "Unknown error" }))) as ProblemDetails;
     throwIfForbidden(res.status, body);
-    throw new Error(body.error ?? `HTTP ${String(res.status)}`);
+    throw new Error(body.detail ?? body.title ?? `HTTP ${String(res.status)}`);
   }
   return res.json() as Promise<T>;
 }
@@ -156,8 +168,8 @@ export function getToken(tokenId: string) {
   return request<Token>(`/api/v1/tokens/${tokenId}`);
 }
 
-export function ensureTrustLine(tokenId: string) {
-  return request<{ tokenId: string; currency: string; status: string }>(`/api/v1/tokens/${tokenId}/trustline`, {
+export function authorizeToken(tokenId: string) {
+  return request<{ tokenId: string; mptIssuanceId: string; status: string }>(`/api/v1/tokens/${tokenId}/authorize`, {
     method: "POST",
   });
 }
@@ -166,49 +178,49 @@ export function getFiatBalance() {
   return request<{ balance: number }>("/api/v1/balance/fiat");
 }
 
-export function getXrpBalance() {
-  return request<{ address: string; balances: XrpBalance[] }>("/api/v1/balance/xrp");
+export function getMptBalance() {
+  return request<{ address: string; balances: MptBalance[] }>("/api/v1/balance/mpt");
 }
 
 export function getFiatTransactions() {
   return request<FiatTransaction[]>("/api/v1/balance/fiat/transactions");
 }
 
-export function getXrpTransactions() {
-  return request<XrpTransaction[]>("/api/v1/balance/xrp/transactions");
+export function getMptTransactions() {
+  return request<MptTransaction[]>("/api/v1/balance/mpt/transactions");
 }
 
-export function getTrustlines() {
-  return request<TrustlineInfo[]>("/api/v1/balance/trustlines");
+export function getAuthorizations() {
+  return request<TokenAuthorizationStatus[]>("/api/v1/balance/authorizations");
 }
 
-export function exchangeFiatToXrp(data: { tokenId: string; fiatAmount: number }) {
-  return request<ExchangeOrder>("/api/v1/exchange/fiat-to-xrp", {
+export function exchangeFiatToMpt(data: { tokenId: string; fiatAmount: number }) {
+  return request<ExchangeOrder>("/api/v1/exchange/fiat-to-mpt", {
     method: "POST",
     body: JSON.stringify(data),
   });
 }
 
-export function exchangeXrpToFiat(data: { tokenId: string; tokenAmount: number }) {
-  return request<ExchangeOrder>("/api/v1/exchange/xrp-to-fiat", {
+export function exchangeMptToFiat(data: { tokenId: string; tokenAmount: number }) {
+  return request<ExchangeOrder>("/api/v1/exchange/mpt-to-fiat", {
     method: "POST",
     body: JSON.stringify(data),
   });
 }
 
-export function getXrpWhitelist() {
-  return request<WhitelistAddress[]>("/api/v1/whitelist/xrp");
+export function getXrplWhitelist() {
+  return request<WhitelistAddress[]>("/api/v1/whitelist/xrpl");
 }
 
-export function addXrpWhitelist(data: { address: string; label: string }) {
-  return request<WhitelistAddress>("/api/v1/whitelist/xrp", {
+export function addXrplWhitelist(data: { address: string; label: string }) {
+  return request<WhitelistAddress>("/api/v1/whitelist/xrpl", {
     method: "POST",
     body: JSON.stringify(data),
   });
 }
 
-export function removeXrpWhitelist(address: string) {
-  return request<{ status: string }>(`/api/v1/whitelist/xrp/${address}`, {
+export function removeXrplWhitelist(address: string) {
+  return request<{ status: string }>(`/api/v1/whitelist/xrpl/${address}`, {
     method: "DELETE",
   });
 }
@@ -243,8 +255,8 @@ export function withdrawFiat(data: { amount: number; bankAccount: BankAccount })
   });
 }
 
-export function withdrawXrp(data: { tokenId: string; tokenAmount: number; destinationAddress: string }) {
-  return request<XrpWithdrawalResult>("/api/v1/withdraw/xrp", {
+export function withdrawMpt(data: { tokenId: string; tokenAmount: number; destinationAddress: string }) {
+  return request<MptWithdrawalResult>("/api/v1/withdraw/mpt", {
     method: "POST",
     body: JSON.stringify(data),
   });
@@ -294,8 +306,8 @@ export async function parseInvoicePdf(pdf: File): Promise<ParsedInvoiceData> {
   });
 
   if (!res.ok) {
-    const body = (await res.json().catch(() => ({ error: "Unknown error" }))) as { error?: string };
-    throw new Error(body.error ?? `HTTP ${String(res.status)}`);
+    const body = (await res.json().catch(() => ({ detail: "Unknown error" }))) as ProblemDetails;
+    throw new Error(body.detail ?? body.title ?? `HTTP ${String(res.status)}`);
   }
 
   return res.json() as Promise<ParsedInvoiceData>;
@@ -316,11 +328,20 @@ export function cancelInvoice(invoiceId: string) {
   });
 }
 
-export async function verifyOperationMfa(code: string): Promise<MfaVerifyResult> {
+export async function verifyOperationMfa(): Promise<MfaVerifyResult> {
   const result = await request<MfaVerifyResult>("/api/v1/mfa/verify", {
     method: "POST",
-    body: JSON.stringify({ code }),
   });
   setMfaToken(result.mfaToken);
   return result;
+}
+
+export function getCredentialStatus() {
+  return request<CredentialStatus>("/api/v1/users/me/credential");
+}
+
+export function retryCredential() {
+  return request<CredentialAcceptResult>("/api/v1/users/me/credential/retry", {
+    method: "POST",
+  });
 }

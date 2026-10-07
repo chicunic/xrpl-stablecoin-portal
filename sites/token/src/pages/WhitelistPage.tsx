@@ -13,11 +13,11 @@ import { useI18n } from "@/i18n";
 import {
   OperationMfaRequiredError,
   addBankWhitelist,
-  addXrpWhitelist,
+  addXrplWhitelist,
   getBankWhitelist,
-  getXrpWhitelist,
+  getXrplWhitelist,
   removeBankWhitelist,
-  removeXrpWhitelist,
+  removeXrplWhitelist,
 } from "@/lib/api";
 import { BANKS, BRANCHES, getBankName, getBranchName } from "@/lib/banks";
 import { formatDate, isValidXrpAddress } from "@/lib/format";
@@ -37,16 +37,13 @@ function XrpWhitelistTab({
   const [showAdd, setShowAdd] = useState(false);
   const [address, setAddress] = useState("");
   const [label, setLabel] = useState("");
-  const [recipientName, setRecipientName] = useState("");
-  const [relationship, setRelationship] = useState("");
-  const [purpose, setPurpose] = useState("");
   const [error, setError] = useState("");
   const [adding, setAdding] = useState(false);
   const [operationMfaOpen, setOperationMfaOpen] = useState(false);
   const pendingRetry = useRef<(() => Promise<void>) | null>(null);
 
   function reload() {
-    getXrpWhitelist()
+    getXrplWhitelist()
       .then(setList)
       .catch(noop)
       .finally(() => {
@@ -61,12 +58,9 @@ function XrpWhitelistTab({
       setError("");
       setAdding(true);
       try {
-        await addXrpWhitelist({ address, label });
+        await addXrplWhitelist({ address, label });
         setAddress("");
         setLabel("");
-        setRecipientName("");
-        setRelationship("");
-        setPurpose("");
         setShowAdd(false);
         reload();
       } catch (err) {
@@ -95,7 +89,7 @@ function XrpWhitelistTab({
   const submitRemove = useCallback(
     async function submitRemove(addr: string) {
       try {
-        await removeXrpWhitelist(addr);
+        await removeXrplWhitelist(addr);
         reload();
       } catch (err) {
         if (err instanceof OperationMfaRequiredError) {
@@ -160,51 +154,7 @@ function XrpWhitelistTab({
                     required
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label>{t("whitelist.recipientName")}</Label>
-                  <Input
-                    value={recipientName}
-                    onChange={(e) => {
-                      setRecipientName(e.target.value);
-                    }}
-                    placeholder={t("whitelist.recipientNamePlaceholder")}
-                    required
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label>{t("whitelist.relationship")}</Label>
-                    <Select value={relationship || undefined} onValueChange={setRelationship}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="self">{t("whitelist.relationshipSelf")}</SelectItem>
-                        <SelectItem value="family">{t("whitelist.relationshipFamily")}</SelectItem>
-                        <SelectItem value="company">{t("whitelist.relationshipCompany")}</SelectItem>
-                        <SelectItem value="other">{t("whitelist.relationshipOther")}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t("whitelist.purpose")}</Label>
-                    <Select value={purpose || undefined} onValueChange={setPurpose}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="investment">{t("whitelist.purposeInvestment")}</SelectItem>
-                        <SelectItem value="trade">{t("whitelist.purposeTrade")}</SelectItem>
-                        <SelectItem value="personal">{t("whitelist.purposePersonal")}</SelectItem>
-                        <SelectItem value="other">{t("whitelist.purposeOther")}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <Button
-                  type="submit"
-                  disabled={adding || !address || !label || !recipientName || !relationship || !purpose}
-                >
+                <Button type="submit" disabled={adding || !address || !label}>
                   {adding ? t("common.adding") : t("common.add")}
                 </Button>
               </form>
@@ -223,27 +173,6 @@ function XrpWhitelistTab({
                       <span className="text-muted-foreground text-xs">{formatDate(item.createdAt)}</span>
                     </div>
                     <p className="text-muted-foreground mt-1 font-mono text-xs break-all">{item.address}</p>
-                    {item.recipientName && (
-                      <div className="text-muted-foreground mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs">
-                        <span>
-                          {t("whitelist.recipientName")}: {item.recipientName}
-                        </span>
-                        {item.relationship && (
-                          <span>
-                            {t("whitelist.relationship")}:{" "}
-                            {t(
-                              `whitelist.relationship${item.relationship.charAt(0).toUpperCase()}${item.relationship.slice(1)}`,
-                            )}
-                          </span>
-                        )}
-                        {item.purpose && (
-                          <span>
-                            {t("whitelist.purpose")}:{" "}
-                            {t(`whitelist.purpose${item.purpose.charAt(0).toUpperCase()}${item.purpose.slice(1)}`)}
-                          </span>
-                        )}
-                      </div>
-                    )}
                   </div>
                   <Button
                     variant="ghost"

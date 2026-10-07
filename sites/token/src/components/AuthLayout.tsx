@@ -4,9 +4,9 @@ import { type ComponentType, useEffect, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { useI18n } from "@/i18n";
-import { getMe, getTrustlines, listTokens } from "@/lib/api";
+import { getAuthorizations, getMe, listTokens } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import type { Token, TrustlineInfo, User, VirtualAccount } from "@/lib/types";
+import type { Token, TokenAuthorizationStatus, User, VirtualAccount } from "@/lib/types";
 
 interface TabDef {
   path: string;
@@ -38,15 +38,15 @@ export function AuthLayout() {
   const [tokens, setTokens] = useState<Token[]>([]);
   const [address, setAddress] = useState("");
   const [virtualAccount, setVirtualAccount] = useState<VirtualAccount | null>(null);
-  const [trustlines, setTrustlines] = useState<TrustlineInfo[]>([]);
+  const [authorizations, setAuthorizations] = useState<TokenAuthorizationStatus[]>([]);
   const [loading, setLoading] = useState(true);
 
   async function loadAll() {
-    const [u, tks, tls] = await Promise.all([getMe(), listTokens(), getTrustlines()]);
+    const [u, tks, auths] = await Promise.all([getMe(), listTokens(), getAuthorizations()]);
     setUser(u);
     setTokens(tks);
     setAddress(u.walletAddress ?? "");
-    setTrustlines(tls);
+    setAuthorizations(auths);
   }
 
   useEffect(() => {
@@ -112,8 +112,8 @@ export function AuthLayout() {
             refreshAll,
             virtualAccount,
             setVirtualAccount,
-            trustlines,
-            refreshTrustlines: () => getTrustlines().then(setTrustlines).catch(noop),
+            authorizations,
+            refreshAuthorizations: () => getAuthorizations().then(setAuthorizations).catch(noop),
           }}
         />
       </main>

@@ -1,16 +1,16 @@
 import { noop } from "@xrpl-stablecoin-portal/shared";
 import { Coins, Link, ShieldCheck, ShieldX, Wallet } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { TrustLineDialog } from "@/components/TrustLineDialog";
+import { AuthorizeDialog } from "@/components/AuthorizeDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useI18n } from "@/i18n";
-import { getFiatBalance, getXrpBalance } from "@/lib/api";
-import { formatCurrency, formatTokenAmount } from "@/lib/format";
+import { getFiatBalance, getMptBalance } from "@/lib/api";
+import { formatCurrency, formatMptAmount } from "@/lib/format";
 import { useAuthContext } from "@/lib/useAuthContext";
 
 export function DashboardPage() {
-  const { address, trustlines, refreshTrustlines } = useAuthContext();
+  const { address, tokens, authorizations, refreshAuthorizations } = useAuthContext();
   const { t } = useI18n();
   const [fiatBalance, setFiatBalance] = useState<number>(0);
   const [balanceMap, setBalanceMap] = useState<Map<string, number>>(new Map());
@@ -18,18 +18,19 @@ export function DashboardPage() {
 
   const tokenDisplays = useMemo(
     () =>
-      trustlines.map((tl) => ({
-        ...tl,
-        balance: balanceMap.get(`${tl.currency}:${tl.issuerAddress}`) ?? 0,
-      })),
-    [trustlines, balanceMap],
+      authorizations.map((auth) => {
+        const assetScale = tokens.find((tk) => tk.tokenId === auth.tokenId)?.assetScale ?? 0;
+        const raw = balanceMap.get(auth.mptIssuanceId) ?? 0;
+        return { ...auth, assetScale, raw, balance: raw / 10 ** assetScale };
+      }),
+    [authorizations, tokens, balanceMap],
   );
 
   const refreshBalances = useCallback(async () => {
     if (!address) return;
     try {
-      const { balances } = await getXrpBalance();
-      setBalanceMap(new Map(balances.map((b) => [`${b.currency}:${b.issuer}`, Number(b.value)])));
+      const { balances } = await getMptBalance();
+      setBalanceMap(new Map(balances.map((b) => [b.mptIssuanceId, Number(b.value)])));
     } catch {
       // account may not exist on ledger yet
     }
@@ -99,27 +100,27 @@ export function DashboardPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">{b.currency}</span>
+                      <span className="text-sm font-medium">{b.name}</span>
                     </div>
                     <p className="text-muted-foreground truncate font-mono text-xs">{b.issuerAddress}</p>
                     <div className="mt-1 flex items-center gap-1.5">
-                      {b.hasTrustline ? (
+                      {b.hasAuthorization ? (
                         <>
                           <ShieldCheck className="h-3.5 w-3.5 text-green-600" />
-                          <span className="text-xs text-green-600">{t("dashboard.trustLineDone")}</span>
+                          <span className="text-xs text-green-600">{t("dashboard.authorizationDone")}</span>
                         </>
                       ) : (
                         <>
                           <ShieldX className="text-muted-foreground h-3.5 w-3.5" />
-                          <span className="text-muted-foreground text-xs">{t("dashboard.trustLineNotSet")}</span>
+                          <span className="text-muted-foreground text-xs">{t("dashboard.authorizationNotSet")}</span>
                         </>
                       )}
                     </div>
                   </div>
                   <div className="shrink-0 text-right">
-                    {b.hasTrustline ? (
+                    {b.hasAuthorization ? (
                       <span className="font-mono text-lg font-semibold tabular-nums">
-                        {formatTokenAmount(b.balance)}
+                        {formatMptAmount(b.raw, b.assetScale)}
                       </span>
                     ) : (
                       <Button
@@ -129,7 +130,7 @@ export function DashboardPage() {
                         }}
                       >
                         <Link className="mr-1.5 h-3.5 w-3.5" />
-                        {t("deposit.trustLineSet")}
+                        {t("deposit.authorize")}
                       </Button>
                     )}
                   </div>
@@ -140,14 +141,14 @@ export function DashboardPage() {
         </CardContent>
       </Card>
 
-      <TrustLineDialog
+      <AuthorizeDialog
         tokenId={trustDialogTokenId}
         open={!!trustDialogTokenId}
         onOpenChange={(open) => {
           if (!open) setTrustDialogTokenId("");
         }}
         onSuccess={() => {
-          refreshTrustlines();
+          refreshAuthorizations();
           void refreshBalances();
         }}
       />

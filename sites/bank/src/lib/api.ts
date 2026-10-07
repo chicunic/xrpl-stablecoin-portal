@@ -14,8 +14,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   }
   const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
   if (!res.ok) {
-    const body: { error?: string } = (await res.json().catch(() => ({ error: "Unknown error" }))) as { error?: string };
-    throw new Error(body.error ?? `HTTP ${String(res.status)}`);
+    const body = (await res.json().catch(() => ({ detail: "Unknown error" }))) as { detail?: string; title?: string };
+    throw new Error(body.detail ?? body.title ?? `HTTP ${String(res.status)}`);
   }
   return res.json() as Promise<T>;
 }
@@ -59,9 +59,9 @@ export function lookupAccount(branchCode: string, accountNumber: string) {
     bankCode: string;
     branchCode: string;
     accountNumber: string;
-    isVirtualAccount: boolean;
-    parentAccountNumber: string;
-    label: string;
+    isVirtualAccount?: boolean;
+    parentAccountNumber?: string;
+    label?: string;
   }>(`/api/v1/accounts/lookup?${params}`);
 }
 
@@ -81,10 +81,16 @@ export function withdraw(amount: number, pin: string) {
 }
 
 // Transfer
-export function transfer(toBranchCode: string, toAccountNumber: string, amount: number, pin: string) {
+export function transfer(
+  toBranchCode: string,
+  toAccountNumber: string,
+  amount: number,
+  pin: string,
+  idempotencyKey?: string,
+) {
   return request<{ balance: number; transactionId: string }>("/api/v1/transfers", {
     method: "POST",
-    body: JSON.stringify({ toBranchCode, toAccountNumber, amount, pin }),
+    body: JSON.stringify({ toBranchCode, toAccountNumber, amount, pin, ...(idempotencyKey ? { idempotencyKey } : {}) }),
   });
 }
 

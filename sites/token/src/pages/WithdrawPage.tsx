@@ -13,25 +13,27 @@ import { useI18n } from "@/i18n";
 import {
   OperationMfaRequiredError,
   getBankWhitelist,
-  getXrpBalance,
-  getXrpWhitelist,
+  getMptBalance,
+  getXrplWhitelist,
   withdrawFiat,
-  withdrawXrp,
+  withdrawMpt,
 } from "@/lib/api";
 import { getBankName, getBranchName } from "@/lib/banks";
-import { formatCurrency, formatTokenAmount } from "@/lib/format";
+import { formatCurrency, formatMptAmount, toRawAmount } from "@/lib/format";
 import type {
   BankAccount,
   FiatWithdrawalResult,
-  TrustlineInfo,
+  MptWithdrawalResult,
+  TokenAuthorizationStatus,
   WhitelistAddress,
-  XrpWithdrawalResult,
 } from "@/lib/types";
 import { useAuthContext } from "@/lib/useAuthContext";
 import { cn } from "@/lib/utils";
 import { explorerTxUrl } from "@/lib/xrpl";
 
-interface TokenBalanceDisplay extends TrustlineInfo {
+interface TokenBalanceDisplay extends TokenAuthorizationStatus {
+  assetScale: number;
+  raw: number;
   balance: number;
 }
 
@@ -235,7 +237,7 @@ function FiatWithdrawForm({
 
 function XrpWithdrawForm({ prereq }: { prereq: { needsKyc: boolean; needsMfa: boolean; disabled: boolean } }) {
   const navigate = useNavigate();
-  const { tokens, address, trustlines } = useAuthContext();
+  const { tokens, address, authorizations } = useAuthContext();
   const { t } = useI18n();
   const [xrpList, setXrpList] = useState<WhitelistAddress[]>([]);
   const [selectedAddress, setSelectedAddress] = useState("");
@@ -245,16 +247,17 @@ function XrpWithdrawForm({ prereq }: { prereq: { needsKyc: boolean; needsMfa: bo
   const [loading, setLoading] = useState(false);
   const [operationMfaOpen, setOperationMfaOpen] = useState(false);
   const [listLoading, setListLoading] = useState(true);
-  const [result, setResult] = useState<XrpWithdrawalResult | null>(null);
+  const [result, setResult] = useState<MptWithdrawalResult | null>(null);
   const [balanceMap, setBalanceMap] = useState<Map<string, number>>(new Map());
 
-  const balances: TokenBalanceDisplay[] = trustlines.map((tl) => ({
-    ...tl,
-    balance: balanceMap.get(`${tl.currency}:${tl.issuerAddress}`) ?? 0,
-  }));
+  const balances: TokenBalanceDisplay[] = authorizations.map((auth) => {
+    const assetScale = tokens.find((tk) => tk.tokenId === auth.tokenId)?.assetScale ?? 0;
+    const raw = balanceMap.get(auth.mptIssuanceId) ?? 0;
+    return { ...auth, assetScale, raw, balance: raw / 10 ** assetScale };
+  });
 
   useEffect(() => {
-    getXrpWhitelist()
+    getXrplWhitelist()
       .then((list) => {
         setXrpList(list);
         const first = list[0];
@@ -266,9 +269,9 @@ function XrpWithdrawForm({ prereq }: { prereq: { needsKyc: boolean; needsMfa: bo
       });
 
     if (address) {
-      getXrpBalance()
+      getMptBalance()
         .then(({ balances }) => {
-          setBalanceMap(new Map(balances.map((b) => [`${b.currency}:${b.issuer}`, Number(b.value)])));
+          setBalanceMap(new Map(balances.map((b) => [b.mptIssuanceId, Number(b.value)])));
         })
         .catch(noop);
     }
@@ -280,9 +283,9 @@ function XrpWithdrawForm({ prereq }: { prereq: { needsKyc: boolean; needsMfa: bo
     setError("");
     setLoading(true);
     try {
-      const res = await withdrawXrp({
+      const res = await withdrawMpt({
         tokenId,
-        tokenAmount: Number(tokenAmount),
+        tokenAmount: toRawAmount(tokenAmount, selectedBalance?.assetScale ?? 0),
         destinationAddress: selectedAddress,
       });
       setResult(res);
@@ -376,7 +379,7 @@ function XrpWithdrawForm({ prereq }: { prereq: { needsKyc: boolean; needsMfa: bo
                     <SelectContent>
                       {tokens.map((tk) => (
                         <SelectItem key={tk.tokenId} value={tk.tokenId}>
-                          {tk.currency} - {tk.issuerAddress}
+                          {tk.name} - {tk.issuerAddress}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -398,7 +401,7 @@ function XrpWithdrawForm({ prereq }: { prereq: { needsKyc: boolean; needsMfa: bo
                   <p className="text-muted-foreground mt-2 text-xs">
                     {t("exchange.availableBalance")}:{" "}
                     {tokenId && selectedBalance
-                      ? `${formatTokenAmount(selectedBalance.balance)} ${tokens.find((tk) => tk.tokenId === tokenId)?.currency ?? ""}`
+                      ? `${formatMptAmount(selectedBalance.raw, selectedBalance.assetScale)} ${tokens.find((tk) => tk.tokenId === tokenId)?.name ?? ""}`
                       : "--"}
                   </p>
                   {tokenAmount && selectedBalance && Number(tokenAmount) > selectedBalance.balance && (

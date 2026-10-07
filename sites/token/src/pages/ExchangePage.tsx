@@ -2,21 +2,23 @@ import { ArrowRight, ExternalLink, Link } from "lucide-react";
 import { type SubmitEvent, useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PrerequisiteAlerts, usePrerequisites } from "@/components/PrerequisiteGuard";
-import { TrustLineDialog } from "@/components/TrustLineDialog";
+import { AuthorizeDialog } from "@/components/AuthorizeDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useI18n } from "@/i18n";
-import { exchangeFiatToXrp, exchangeXrpToFiat, getXrpBalance } from "@/lib/api";
-import { formatCurrency, formatTokenAmount } from "@/lib/format";
-import type { ExchangeOrder, Token, TrustlineInfo, User } from "@/lib/types";
+import { exchangeFiatToMpt, exchangeMptToFiat, getMptBalance } from "@/lib/api";
+import { formatCurrency, formatMptAmount, toRawAmount } from "@/lib/format";
+import type { ExchangeOrder, Token, TokenAuthorizationStatus, User } from "@/lib/types";
 import { useAuthContext } from "@/lib/useAuthContext";
 import { cn } from "@/lib/utils";
 import { explorerTxUrl } from "@/lib/xrpl";
 
-interface TokenBalanceDisplay extends TrustlineInfo {
+interface TokenBalanceDisplay extends TokenAuthorizationStatus {
+  assetScale: number;
+  raw: number;
   balance: number;
 }
 
@@ -34,7 +36,7 @@ function ExchangeForm({
   onKycComplete?: () => void;
 }) {
   const navigate = useNavigate();
-  const { address, trustlines, refreshTrustlines } = useAuthContext();
+  const { address, authorizations, refreshAuthorizations } = useAuthContext();
   const { t } = useI18n();
   const isFiatToToken = direction === "fiat_to_token";
   const [tokenId, setTokenId] = useState("");
@@ -45,16 +47,17 @@ function ExchangeForm({
   const [balanceMap, setBalanceMap] = useState<Map<string, number>>(new Map());
   const [trustDialogOpen, setTrustDialogOpen] = useState(false);
 
-  const balances: TokenBalanceDisplay[] = trustlines.map((tl) => ({
-    ...tl,
-    balance: balanceMap.get(`${tl.currency}:${tl.issuerAddress}`) ?? 0,
-  }));
+  const balances: TokenBalanceDisplay[] = authorizations.map((auth) => {
+    const assetScale = tokens.find((tk) => tk.tokenId === auth.tokenId)?.assetScale ?? 0;
+    const raw = balanceMap.get(auth.mptIssuanceId) ?? 0;
+    return { ...auth, assetScale, raw, balance: raw / 10 ** assetScale };
+  });
 
   const fetchBalances = useCallback(async () => {
     if (!address) return;
     try {
-      const { balances } = await getXrpBalance();
-      setBalanceMap(new Map(balances.map((b) => [`${b.currency}:${b.issuer}`, Number(b.value)])));
+      const { balances } = await getMptBalance();
+      setBalanceMap(new Map(balances.map((b) => [b.mptIssuanceId, Number(b.value)])));
     } catch {
       // account may not exist on ledger yet
     }
@@ -66,7 +69,7 @@ function ExchangeForm({
 
   const selectedToken = tokens.find((tk) => tk.tokenId === tokenId);
   const selectedBalance = balances.find((b) => b.tokenId === tokenId);
-  const hasTrustline = !isFiatToToken || (selectedBalance?.hasTrustline ?? false);
+  const hasAuthorization = !isFiatToToken || (selectedBalance?.hasAuthorization ?? false);
 
   function handleTokenChange(newTokenId: string) {
     setTokenId(newTokenId);
@@ -81,8 +84,8 @@ function ExchangeForm({
     setLoading(true);
     try {
       const res = isFiatToToken
-        ? await exchangeFiatToXrp({ tokenId, fiatAmount: Number(amount) })
-        : await exchangeXrpToFiat({ tokenId, tokenAmount: Number(amount) });
+        ? await exchangeFiatToMpt({ tokenId, fiatAmount: Number(amount) })
+        : await exchangeMptToFiat({ tokenId, tokenAmount: toRawAmount(amount, selectedToken?.assetScale ?? 0) });
       setResult(res);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("exchange.error"));
@@ -118,7 +121,7 @@ function ExchangeForm({
                 <span>
                   {result.direction === "fiat_to_token"
                     ? formatCurrency(result.amount)
-                    : `${formatTokenAmount(result.amount)} ${selectedToken?.currency ?? ""}`}
+                    : `${formatMptAmount(result.amount, selectedToken?.assetScale ?? 0)} ${selectedToken?.name ?? ""}`}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -154,14 +157,14 @@ function ExchangeForm({
             onSubmit={handleSubmit}
             className={cn("space-y-4", prereq.disabled && "cursor-not-allowed opacity-50 [&_*]:pointer-events-none")}
           >
-            {isFiatToToken && tokenId && !hasTrustline && (
+            {isFiatToToken && tokenId && !hasAuthorization && (
               <div className="flex items-center justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <Link className="h-5 w-5 text-amber-600" />
-                    <p className="text-sm font-medium">{t("deposit.trustLineTitle")}</p>
+                    <p className="text-sm font-medium">{t("deposit.authorizeTitle")}</p>
                   </div>
-                  <p className="text-muted-foreground text-sm">{t("deposit.trustLineWarning")}</p>
+                  <p className="text-muted-foreground text-sm">{t("deposit.authorizeWarning")}</p>
                 </div>
                 <Button
                   type="button"
@@ -172,16 +175,16 @@ function ExchangeForm({
                   }}
                   className="shrink-0"
                 >
-                  {t("deposit.trustLineSet")}
+                  {t("deposit.authorize")}
                 </Button>
               </div>
             )}
-            <TrustLineDialog
+            <AuthorizeDialog
               tokenId={tokenId}
               open={trustDialogOpen}
               onOpenChange={setTrustDialogOpen}
               onSuccess={() => {
-                refreshTrustlines();
+                refreshAuthorizations();
                 void fetchBalances();
               }}
             />
@@ -222,7 +225,7 @@ function ExchangeForm({
                       <SelectContent>
                         {tokens.map((tk) => (
                           <SelectItem key={tk.tokenId} value={tk.tokenId}>
-                            {tk.currency} - {tk.issuerAddress}
+                            {tk.name} - {tk.issuerAddress}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -241,7 +244,7 @@ function ExchangeForm({
                         <SelectContent>
                           {tokens.map((tk) => (
                             <SelectItem key={tk.tokenId} value={tk.tokenId}>
-                              {tk.currency} - {tk.issuerAddress}
+                              {tk.name} - {tk.issuerAddress}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -265,7 +268,7 @@ function ExchangeForm({
                       <p className="text-muted-foreground mt-2 text-xs">
                         {t("exchange.availableBalance")}:{" "}
                         {tokenId && selectedBalance
-                          ? `${formatTokenAmount(selectedBalance.balance)} ${selectedToken?.currency ?? ""}`
+                          ? `${formatMptAmount(selectedBalance.raw, selectedBalance.assetScale)} ${selectedToken?.name ?? ""}`
                           : "--"}
                       </p>
                       {amount && selectedBalance && Number(amount) > selectedBalance.balance && (
@@ -294,7 +297,7 @@ function ExchangeForm({
                 loading ||
                 !tokenId ||
                 !amount ||
-                !hasTrustline ||
+                !hasAuthorization ||
                 (isFiatToToken && Number(amount) > user.fiatBalance) ||
                 (!isFiatToToken && selectedBalance != null && Number(amount) > selectedBalance.balance)
               }
